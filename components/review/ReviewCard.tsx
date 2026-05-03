@@ -1,26 +1,25 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { PostWithCategory } from "@/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StarRating } from "@/components/review/StarRating";
 import { Badge } from "@/components/ui/badge";
+import { ReviewCardImage } from "@/components/review/ReviewCardImage";
 
-const PLACEHOLDER =
-  "https://placehold.co/800x500/e2e8f0/64748b?text=Product";
-
-export function ReviewCard({ post }: { post: PostWithCategory }) {
-  const src = post.image_url || PLACEHOLDER;
-
+export function ReviewCard({
+  post,
+  imageSizes = "(max-width:768px) 100vw, 33vw",
+}: {
+  post: PostWithCategory;
+  imageSizes?: string;
+}) {
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-md">
       <Link href={`/blog/${post.slug}`} className="block">
         <div className="relative aspect-[16/10] w-full bg-muted">
-          <Image
-            src={src}
+          <ReviewCardImage
+            src={post.image_url}
             alt={post.title}
-            fill
-            className="object-cover"
-            sizes="(max-width:768px) 100vw, 33vw"
+            sizes={imageSizes}
           />
         </div>
         <CardHeader className="space-y-2 pb-2">
@@ -39,7 +38,7 @@ export function ReviewCard({ post }: { post: PostWithCategory }) {
             {post.excerpt}
           </p>
           <span className="mt-3 inline-block text-sm font-medium text-primary">
-            Read review →
+            Read more
           </span>
         </CardContent>
       </Link>

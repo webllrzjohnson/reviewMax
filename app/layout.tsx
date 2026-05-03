@@ -6,6 +6,11 @@ import { Toaster } from "sonner";
 import { CookieBanner } from "@/components/common/CookieBanner";
 import { siteUrl, cn } from "@/lib/utils";
 
+/**
+ * Root shell: fonts, providers, toast, and cookie consent.
+ * Browse pages wrap content in `PublicShell` (sticky Header, Footer, Sidebar).
+ */
+
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-sans",

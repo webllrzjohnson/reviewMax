@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { submitReviewRequest } from "@/actions/review-request";
 import type { Category } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ function SubmitButton() {
 }
 
 export function NewReviewForm({ categories }: { categories: Category[] }) {
-  const [state, formAction] = useFormState(submitReviewRequest, initial);
+  const [state, formAction] = useActionState(submitReviewRequest, initial);
 
   return (
     <Card>

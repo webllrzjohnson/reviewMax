@@ -8,7 +8,7 @@ export async function getCategories(): Promise<Category[]> {
     .select("*")
     .order("name", { ascending: true });
   if (error) {
-    console.error("getCategories", error);
+    console.warn("getCategories", error);
     return [];
   }
   return data ?? [];
@@ -37,7 +37,7 @@ export async function getPublishedPosts(limit = 50): Promise<PostWithCategory[]>
     .order("published_at", { ascending: false })
     .limit(limit);
   if (error) {
-    console.error("getPublishedPosts", error);
+    console.warn("getPublishedPosts", error);
     return [];
   }
   return (data as PostWithCategory[]) ?? [];
@@ -70,7 +70,7 @@ export async function getPostsByCategorySlug(
     .eq("category_id", category.id)
     .order("published_at", { ascending: false });
   if (error) {
-    console.error("getPostsByCategorySlug", error);
+    console.warn("getPostsByCategorySlug", error);
     return [];
   }
   return (data as PostWithCategory[]) ?? [];
@@ -91,7 +91,7 @@ export async function getRelatedPosts(
     .order("published_at", { ascending: false })
     .limit(limit);
   if (error) {
-    console.error("getRelatedPosts", error);
+    console.warn("getRelatedPosts", error);
     return [];
   }
   return (data as PostWithCategory[]) ?? [];
@@ -107,7 +107,7 @@ export async function getPopularPosts(limit = 5): Promise<PostWithCategory[]> {
     .order("published_at", { ascending: false })
     .limit(limit);
   if (error) {
-    console.error("getPopularPosts", error);
+    console.warn("getPopularPosts", error);
     return [];
   }
   return (data as PostWithCategory[]) ?? [];
@@ -156,7 +156,7 @@ export async function getPublishedPostsPage(params: {
     .range(from, to);
 
   if (error) {
-    console.error("getPublishedPostsPage", error);
+    console.warn("getPublishedPostsPage", error);
     return { posts: [], total: 0 };
   }
 

@@ -105,6 +105,30 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- -----------------------------------------------------------------------------
+-- RLS helpers (avoid 42P17: infinite recursion when policies subquery profiles)
+-- -----------------------------------------------------------------------------
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select coalesce(
+    (
+      select p.role = 'admin'
+      from public.profiles p
+      where p.id = auth.uid()
+    ),
+    false
+  );
+$$;
+
+revoke all on function public.is_admin() from public;
+grant execute on function public.is_admin() to anon, authenticated;
+
+-- -----------------------------------------------------------------------------
 -- Row Level Security
 -- -----------------------------------------------------------------------------
 
@@ -120,30 +144,15 @@ create policy "Categories are viewable by everyone"
 
 create policy "Admins insert categories"
   on public.categories for insert
-  with check (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role = 'admin'
-    )
-  );
+  with check (public.is_admin());
 
 create policy "Admins update categories"
   on public.categories for update
-  using (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role = 'admin'
-    )
-  );
+  using (public.is_admin());
 
 create policy "Admins delete categories"
   on public.categories for delete
-  using (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role = 'admin'
-    )
-  );
+  using (public.is_admin());
 
 -- Posts: public read published; admin read all; service role bypasses RLS
 create policy "Published posts are viewable by everyone"
@@ -152,12 +161,7 @@ create policy "Published posts are viewable by everyone"
 
 create policy "Admins can view all posts"
   on public.posts for select
-  using (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role = 'admin'
-    )
-  );
+  using (public.is_admin());
 
 -- Newsletter
 create policy "Anyone can subscribe to newsletter"
@@ -166,12 +170,7 @@ create policy "Anyone can subscribe to newsletter"
 
 create policy "Admins can view newsletter subscribers"
   on public.newsletter_subscribers for select
-  using (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role = 'admin'
-    )
-  );
+  using (public.is_admin());
 
 -- Profiles
 create policy "Users can view own profile"
@@ -185,21 +184,11 @@ create policy "Users can update own profile"
 -- Review requests (admin only)
 create policy "Admins insert review requests"
   on public.review_requests for insert
-  with check (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role = 'admin'
-    )
-  );
+  with check (public.is_admin());
 
 create policy "Admins view review requests"
   on public.review_requests for select
-  using (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role = 'admin'
-    )
-  );
+  using (public.is_admin());
 
 -- -----------------------------------------------------------------------------
 -- Seed: categories (fixed IDs for sample posts)
