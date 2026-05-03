@@ -1,8 +1,8 @@
 /**
- * ReviewMax — shared TypeScript types & Supabase row shapes.
- * Replace `Database` with output from:
- * `npx supabase gen types typescript --project-id <ref> --schema public`
+ * ReviewMax — shared app types and Supabase schema re-exports.
  */
+
+export type { Database, Json, Tables, TablesInsert, TablesUpdate, UserRole } from "./supabase";
 
 export type AdminRole = "admin" | "user";
 
@@ -65,20 +65,3 @@ export interface Profile {
   full_name: string | null;
   created_at: string;
 }
-
-/**
- * Supabase client generic. Replace with output from:
- * `npx supabase gen types typescript --project-id <ref> --schema public`
- * for full compile-time insert/select typing against your project.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Database = any;
-
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
-

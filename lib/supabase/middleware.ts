@@ -1,16 +1,25 @@
 import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
-import type { Database } from "@/types";
+import type { Database } from "@/types/supabase";
 
+/**
+ * Refreshes the auth session and protects `/dashboard/*` for admin users only.
+ */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  const supabase: SupabaseClient<Database> = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon) {
+    return supabaseResponse;
+  }
+
+  const supabase: SupabaseClient<Database> = createServerClient<Database>(
+    url,
+    anon,
     {
       cookies: {
         getAll() {
@@ -29,7 +38,7 @@ export async function updateSession(request: NextRequest) {
         },
       },
     },
-  ) as unknown as SupabaseClient<Database>;
+  );
 
   const {
     data: { user },
@@ -39,10 +48,10 @@ export async function updateSession(request: NextRequest) {
 
   if (path.startsWith("/dashboard")) {
     if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      url.searchParams.set("next", path);
-      return NextResponse.redirect(url);
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.searchParams.set("next", `${path}${request.nextUrl.search}`);
+      return NextResponse.redirect(redirectUrl);
     }
 
     const { data: profile } = await supabase
@@ -52,9 +61,10 @@ export async function updateSession(request: NextRequest) {
       .single();
 
     if (profile?.role !== "admin") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/";
-      return NextResponse.redirect(url);
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
     }
   }
 

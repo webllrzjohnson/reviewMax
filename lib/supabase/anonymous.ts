@@ -1,10 +1,16 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/types";
+import type { Database } from "@/types/supabase";
 
-/** Anonymous Supabase client (no cookies). Use in sitemap/build contexts. */
+/** Anonymous client (no cookies) — sitemap, cron, or build-time reads. */
 export function createAnonymousClient(): SupabaseClient<Database> {
-  return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  ) as unknown as SupabaseClient<Database>;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    );
+  }
+  return createClient<Database>(url, anon, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
