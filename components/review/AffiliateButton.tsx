@@ -4,7 +4,7 @@ import Link from "next/link";
 import posthog from "posthog-js";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { withAmazonAffiliateTag } from "@/lib/utils";
+import { withAmazonAffiliateTag, cn } from "@/lib/utils";
 
 const trackingId = process.env.NEXT_PUBLIC_AMAZON_TRACKING_ID;
 
@@ -12,10 +12,12 @@ export function AffiliateButton({
   href_raw,
   label = "Buy on Amazon",
   postSlug,
+  className,
 }: {
   href_raw: string;
   label?: string;
   postSlug?: string;
+  className?: string;
 }) {
   const href = withAmazonAffiliateTag(href_raw, trackingId);
 
@@ -29,7 +31,12 @@ export function AffiliateButton({
   }
 
   return (
-    <Button variant="amazon" size="lg" className="w-full sm:w-auto" asChild>
+    <Button
+      variant="amazon"
+      size="lg"
+      className={cn("w-full sm:w-auto", className)}
+      asChild
+    >
       <Link
         href={href}
         target="_blank"

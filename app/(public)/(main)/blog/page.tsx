@@ -14,13 +14,28 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600;
 
+const PAGE_SIZE = 9;
+
 type SearchParams = Record<string, string | string[] | undefined>;
 
-export default async function BlogIndexPage(props: {
-  searchParams: Promise<SearchParams>;
-}) {
-  const searchParams = await props.searchParams;
+function BlogPostsSkeleton() {
+  return (
+    <div className="space-y-10">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+          <Skeleton key={i} className="h-96 rounded-lg" />
+        ))}
+      </div>
+      <Skeleton className="mx-auto h-10 w-72" />
+    </div>
+  );
+}
 
+async function BlogPostsSection({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const page =
     Number(
       Array.isArray(searchParams.page)
@@ -34,13 +49,26 @@ export default async function BlogIndexPage(props: {
     ? searchParams.category[0]
     : searchParams.category;
 
-  const categories = await getCategories();
   const { posts, total } = await getPublishedPostsPage({
     page,
-    pageSize: 12,
+    pageSize: PAGE_SIZE,
     q: qRaw,
     categorySlug: catRaw,
   });
+
+  return (
+    <>
+      <PostList posts={posts} />
+      <BlogPagination page={page} pageSize={PAGE_SIZE} total={total} />
+    </>
+  );
+}
+
+export default async function BlogIndexPage(props: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const searchParams = await props.searchParams;
+  const categories = await getCategories();
 
   return (
     <div className="space-y-8">
@@ -54,10 +82,8 @@ export default async function BlogIndexPage(props: {
 
       <BlogExplorer categories={categories} />
 
-      <PostList posts={posts} />
-
-      <Suspense fallback={<Skeleton className="mx-auto h-10 w-64" />}>
-        <BlogPagination page={page} pageSize={12} total={total} />
+      <Suspense fallback={<BlogPostsSkeleton />}>
+        <BlogPostsSection searchParams={searchParams} />
       </Suspense>
     </div>
   );

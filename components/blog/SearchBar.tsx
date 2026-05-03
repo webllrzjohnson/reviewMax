@@ -33,7 +33,7 @@ export function SearchBar() {
       <Input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search reviews…"
+        placeholder="Search by title…"
         className="pl-9"
         aria-busy={isPending}
       />

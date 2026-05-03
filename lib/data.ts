@@ -79,7 +79,7 @@ export async function getPostsByCategorySlug(
 export async function getRelatedPosts(
   categoryId: string,
   excludeSlug: string,
-  limit = 4,
+  limit = 3,
 ): Promise<PostWithCategory[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -125,7 +125,7 @@ export async function getPublishedPostsPage(params: {
   categorySlug?: string;
 }): Promise<PostsPageResult> {
   const page = Math.max(1, params.page ?? 1);
-  const pageSize = Math.min(48, Math.max(1, params.pageSize ?? 12));
+  const pageSize = Math.min(48, Math.max(1, params.pageSize ?? 9));
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -138,8 +138,7 @@ export async function getPublishedPostsPage(params: {
   if (params.q?.trim()) {
     const safe = params.q.trim().replace(/[%_]/g, " ").slice(0, 80);
     if (safe.length > 0) {
-      const term = `%${safe}%`;
-      query = query.or(`title.ilike.${term},excerpt.ilike.${term}`);
+      query = query.ilike("title", `%${safe}%`);
     }
   }
 

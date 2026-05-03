@@ -4,7 +4,7 @@ import { getPostBySlug } from "@/lib/data";
 import { ReviewDetail } from "@/components/review/ReviewDetail";
 import { siteUrl } from "@/lib/utils";
 
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 type Props = { params: Promise<{ slug: string }> };
 
