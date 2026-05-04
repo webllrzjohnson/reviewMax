@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-const STORAGE_KEY = "reviewwire-cookie-consent";
+const STORAGE_KEY = "reviewmax-cookie-consent";
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
@@ -18,11 +18,11 @@ export function CookieBanner() {
     }
   }, []);
 
-  function accept() {
+  function persistPreference(value: "accepted" | "declined") {
     try {
-      localStorage.setItem(STORAGE_KEY, "accepted");
+      localStorage.setItem(STORAGE_KEY, value);
     } catch {
-      /* ignore */
+      /* ignore private mode / quota */
     }
     setVisible(false);
   }
@@ -33,20 +33,30 @@ export function CookieBanner() {
     <div
       role="dialog"
       aria-label="Cookie consent"
-      className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 p-4 shadow-lg backdrop-blur"
+      aria-modal="false"
+      className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 p-4 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/85"
     >
-      <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto flex max-w-4xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
           We use essential cookies and optional analytics (PostHog) to improve
-          the site. By continuing, you agree to our{" "}
-          <a href="/privacy-policy" className="underline">
+          the site. You can accept or decline non-essential cookies. See our{" "}
+          <a href="/privacy-policy" className="font-medium underline">
             Privacy Policy
           </a>
           .
         </p>
-        <Button onClick={accept} className="shrink-0">
-          Accept
-        </Button>
+        <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => persistPreference("declined")}
+          >
+            Decline
+          </Button>
+          <Button type="button" onClick={() => persistPreference("accepted")}>
+            Accept
+          </Button>
+        </div>
       </div>
     </div>
   );

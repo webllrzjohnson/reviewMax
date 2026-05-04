@@ -9,6 +9,10 @@ export type NewsletterState = {
   message?: string;
 };
 
+/**
+ * Validates email with NewsletterSchema and upserts into `newsletter_subscribers`
+ * (idempotent for existing addresses via `ignoreDuplicates`).
+ */
 export async function subscribeToNewsletter(
   _prev: NewsletterState,
   formData: FormData,
@@ -20,21 +24,22 @@ export async function subscribeToNewsletter(
     return { ok: false, message: err ?? "Invalid email" };
   }
 
+  const email = parsed.data.email.trim().toLowerCase();
+
   try {
     const supabase = await createClient();
-    const { error } = await supabase
-      .from("newsletter_subscribers")
-      .insert({ email: parsed.data.email });
+    const { error } = await supabase.from("newsletter_subscribers").upsert(
+      { email },
+      { onConflict: "email", ignoreDuplicates: true },
+    );
 
     if (error) {
-      if (error.code === "23505") {
-        return { ok: true, message: "You are already subscribed. Thank you!" };
-      }
-      console.error("newsletter insert", error);
+      console.error("newsletter upsert", error);
       return { ok: false, message: "Could not subscribe. Try again later." };
     }
 
     revalidatePath("/");
+    revalidatePath("/dashboard");
     return { ok: true, message: "Thanks — you are subscribed." };
   } catch (e) {
     console.error(e);

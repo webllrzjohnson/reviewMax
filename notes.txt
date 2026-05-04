@@ -588,6 +588,12 @@ SERVICE ROLE KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 
 Anon Public Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjdXBra2h1a2NlcWdhanVheG5rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MTY1MDgsImV4cCI6MjA5MzM5MjUwOH0.zZ8r5NktRQgLQJpRImE0vSfEDqNHfH6XphNBquJoJ6I
 
+User: Shuai.jan28@gmail.com
+pw:marlb0r0@@11
+
+UUID: aa97b4ae-c388-4087-bb06-cd7b3d664ddb
+
+
 -------------------------------------------------------------
 
 AMAZON:
@@ -595,5 +601,7 @@ AMAZON:
 Your unique Associate ID is lesterj-20
 
 ---------------------------------------------------------------
+
+
 
 

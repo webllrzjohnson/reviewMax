@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { getAdminDashboardData } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,62 +8,109 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: requests } = await supabase
-    .from("review_requests")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(15);
+  const { email, stats, recentRequests } = await getAdminDashboardData();
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className="space-y-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Queue a topic for the n8n + Claude pipeline.
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+            Dashboard
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            Signed in as{" "}
+            <span className="font-medium text-foreground">{email}</span>.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/new-review">New review request</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="default">
+            <Link href="/dashboard/new-review">New review request</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/dashboard/posts">Manage posts</Link>
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Total posts" value={stats.posts} />
+        <StatCard label="Categories" value={stats.categories} />
+        <StatCard label="Newsletter subscribers" value={stats.subscribers} />
+        <StatCard
+          label="Pending review requests"
+          value={stats.pendingReviewRequests}
+        />
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Recent review requests</CardTitle>
           <CardDescription>
-            Each row is logged when an admin submits the form. n8n should pick
-            up the webhook and publish the finished post via the API route.
+            Last 10 items submitted from the dashboard (n8n webhook optional).
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          {requests && requests.length > 0 ? (
-            <ul className="divide-y rounded-md border">
-              {requests.map((r) => (
-                <li key={r.id} className="px-4 py-3 text-sm">
-                  <p className="font-medium">{r.product_name}</p>
-                  <p className="text-muted-foreground">
-                    {r.category_slug} ·{" "}
-                    {new Date(r.created_at).toLocaleString()}
-                  </p>
-                  {r.notes ? (
-                    <p className="mt-1 text-muted-foreground">{r.notes}</p>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          ) : (
+        <CardContent className="overflow-x-auto">
+          {recentRequests.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No requests yet. Create one to test your n8n workflow.
+              No review requests yet.{" "}
+              <Link href="/dashboard/new-review" className="text-primary underline">
+                Create one
+              </Link>{" "}
+              to test your pipeline.
             </p>
+          ) : (
+            <table className="w-full min-w-[640px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="pb-3 pr-4 font-medium">Product</th>
+                  <th className="pb-3 pr-4 font-medium">Category</th>
+                  <th className="pb-3 pr-4 font-medium">Amazon URL</th>
+                  <th className="pb-3 pr-4 font-medium">Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentRequests.map((r) => (
+                  <tr key={r.id} className="border-b last:border-0">
+                    <td className="py-3 pr-4 align-top font-medium">
+                      {r.product_name}
+                    </td>
+                    <td className="py-3 pr-4 align-top">{r.category_slug}</td>
+                    <td className="py-3 pr-4 align-top">
+                      <a
+                        href={r.amazon_url}
+                        className="max-w-[200px] truncate text-primary underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {r.amazon_url}
+                      </a>
+                    </td>
+                    <td className="py-3 pr-4 align-top text-muted-foreground">
+                      {formatDate(r.created_at)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardDescription>{label}</CardDescription>
+        <CardTitle className="text-3xl tabular-nums">{value}</CardTitle>
+      </CardHeader>
+    </Card>
   );
 }

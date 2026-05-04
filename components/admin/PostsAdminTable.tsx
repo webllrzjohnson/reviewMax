@@ -1,0 +1,120 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import Link from "next/link";
+import type { PostWithCategory } from "@/types";
+import { deletePost, setPostPublished } from "@/actions/posts";
+import { formatDate } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+
+  if (posts.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed bg-muted/30 p-10 text-center text-sm text-muted-foreground">
+        No posts yet. Use your n8n workflow or seed SQL to add content.
+      </div>
+    );
+  }
+
+  function refresh() {
+    router.refresh();
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-lg border">
+      <table className="w-full min-w-[900px] border-collapse text-sm">
+        <thead>
+          <tr className="border-b bg-muted/40 text-left text-muted-foreground">
+            <th className="px-4 py-3 font-medium">Title</th>
+            <th className="px-4 py-3 font-medium">Category</th>
+            <th className="px-4 py-3 font-medium">Rating</th>
+            <th className="px-4 py-3 font-medium">Published</th>
+            <th className="px-4 py-3 font-medium">Status</th>
+            <th className="px-4 py-3 font-medium text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {posts.map((post) => (
+            <tr key={post.id} className="border-b last:border-0">
+              <td className="max-w-[280px] px-4 py-3 align-top">
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="font-medium text-primary hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {post.title}
+                </Link>
+              </td>
+              <td className="px-4 py-3 align-top">
+                {post.category?.name ?? "—"}
+              </td>
+              <td className="px-4 py-3 align-top tabular-nums">
+                {post.rating != null ? `${post.rating.toFixed(1)} / 5` : "—"}
+              </td>
+              <td className="px-4 py-3 align-top text-muted-foreground">
+                {post.published_at ? formatDate(post.published_at) : "—"}
+              </td>
+              <td className="px-4 py-3 align-top">
+                <Badge
+                  variant={post.is_published ? "default" : "secondary"}
+                  className={cn(
+                    !post.is_published && "text-muted-foreground",
+                  )}
+                >
+                  {post.is_published ? "Published" : "Draft"}
+                </Badge>
+              </td>
+              <td className="px-4 py-3 align-top text-right">
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-input"
+                      checked={post.is_published}
+                      disabled={pending}
+                      onChange={() => {
+                        startTransition(async () => {
+                          await setPostPublished(post.id, !post.is_published);
+                          refresh();
+                        });
+                      }}
+                    />
+                    Live
+                  </label>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    disabled={pending}
+                    onClick={() => {
+                      if (
+                        !window.confirm(
+                          `Delete “${post.title}”? This cannot be undone.`,
+                        )
+                      ) {
+                        return;
+                      }
+                      startTransition(async () => {
+                        await deletePost(post.id);
+                        refresh();
+                      });
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}

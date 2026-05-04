@@ -2,24 +2,26 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { ReviewRequestSchema } from "@/lib/validations";
+import {
+  ReviewRequestSchema,
+  type ReviewRequestInput,
+} from "@/lib/validations";
 
 export type ReviewRequestState = {
   ok: boolean;
   message?: string;
 };
 
-export async function submitReviewRequest(
-  _prev: ReviewRequestState,
-  formData: FormData,
+/**
+ * Validates with ReviewRequestSchema, inserts into `review_requests`,
+ * then POSTs to n8n with JSON body
+ * `{ product_name, category, amazon_url, notes }` and header
+ * `X-Webhook-Secret: process.env.WEBHOOK_SECRET` (empty string if unset).
+ */
+export async function submitReviewRequestAction(
+  input: ReviewRequestInput,
 ): Promise<ReviewRequestState> {
-  const parsed = ReviewRequestSchema.safeParse({
-    product_name: formData.get("product_name"),
-    category: formData.get("category"),
-    amazon_url: formData.get("amazon_url"),
-    notes: formData.get("notes") || undefined,
-  });
-
+  const parsed = ReviewRequestSchema.safeParse(input);
   if (!parsed.success) {
     const first =
       Object.values(parsed.error.flatten().fieldErrors).flat()[0] ??
@@ -39,33 +41,36 @@ export async function submitReviewRequest(
 
     const { error } = await supabase.from("review_requests").insert({
       product_name: parsed.data.product_name,
-      category_slug: parsed.data.category,
+      category: parsed.data.category,
       amazon_url: parsed.data.amazon_url,
-      notes: parsed.data.notes ?? null,
-      created_by: user.id,
+      notes:
+        parsed.data.notes != null && parsed.data.notes.trim() !== ""
+          ? parsed.data.notes.trim()
+          : null,
     });
-
     if (error) {
       console.error("review_requests insert", error);
       return { ok: false, message: "Could not save request." };
     }
 
     const webhookUrl = process.env.N8N_REVIEW_WEBHOOK_URL;
-    const secret = process.env.WEBHOOK_SECRET;
+
     if (webhookUrl) {
       try {
         await fetch(webhookUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(secret ? { "X-Webhook-Secret": secret } : {}),
+            "X-Webhook-Secret": process.env.WEBHOOK_SECRET ?? "",
           },
           body: JSON.stringify({
             product_name: parsed.data.product_name,
-            category_slug: parsed.data.category,
+            category: parsed.data.category,
             amazon_url: parsed.data.amazon_url,
-            notes: parsed.data.notes ?? null,
-            requested_by: user.email,
+            notes:
+              parsed.data.notes != null && parsed.data.notes.trim() !== ""
+                ? parsed.data.notes.trim()
+                : null,
           }),
         });
       } catch (e) {
@@ -77,7 +82,7 @@ export async function submitReviewRequest(
     return {
       ok: true,
       message:
-        "Request queued. n8n will generate and publish the review automatically.",
+        "Request saved. n8n will pick up the webhook and can publish via your API route when ready.",
     };
   } catch (e) {
     console.error(e);

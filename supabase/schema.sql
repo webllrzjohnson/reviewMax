@@ -163,6 +163,19 @@ create policy "Admins can view all posts"
   on public.posts for select
   using (public.is_admin());
 
+create policy "Admins insert posts"
+  on public.posts for insert
+  with check (public.is_admin());
+
+create policy "Admins update posts"
+  on public.posts for update
+  using (public.is_admin())
+  with check (public.is_admin());
+
+create policy "Admins delete posts"
+  on public.posts for delete
+  using (public.is_admin());
+
 -- Newsletter
 create policy "Anyone can subscribe to newsletter"
   on public.newsletter_subscribers for insert
