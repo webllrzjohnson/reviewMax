@@ -41,7 +41,7 @@ export async function submitReviewRequestAction(
 
     const { error } = await supabase.from("review_requests").insert({
       product_name: parsed.data.product_name,
-      category: parsed.data.category,
+      category_slug: parsed.data.category,
       amazon_url: parsed.data.amazon_url,
       notes:
         parsed.data.notes != null && parsed.data.notes.trim() !== ""

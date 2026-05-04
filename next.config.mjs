@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 import { withSentryConfig } from "@sentry/nextjs";
+import { isSentryConfigured } from "./sentry-env.mjs";
 
 const nextConfig = {
   images: {
@@ -23,6 +24,6 @@ const sentryOptions = {
   disableLogger: true,
 };
 
-export default process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN
+export default isSentryConfigured()
   ? withSentryConfig(nextConfig, sentryOptions)
   : nextConfig;

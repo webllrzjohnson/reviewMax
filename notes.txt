@@ -603,5 +603,25 @@ Your unique Associate ID is lesterj-20
 ---------------------------------------------------------------
 
 
+$body = @{
+  title = "Test Post from n8n"
+  slug = "test-post-from-n8n"
+  excerpt = "This is a test post."
+  body = "<p>Test body content.</p>"
+  category_id = "2da59313-402d-4fe9-bbea-a171555bb640"
+  rating = 4.5
+  pros = @("Easy to use", "Great value")
+  cons = @("Limited features")
+  verdict = "A solid choice overall."
+  amazon_url = "https://www.amazon.com/dp/test"
+  image_url = $null
+} | ConvertTo-Json
 
+Invoke-RestMethod -Uri "http://localhost:3000/api/webhook/n8n" `
+  -Method POST `
+  -Headers @{
+    "Content-Type" = "application/json"
+    "X-Webhook-Secret" = "your-webhook-secret-from-env"
+  } `
+  -Body $body
 

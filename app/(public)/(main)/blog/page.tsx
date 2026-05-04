@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteUrl } from "@/lib/utils";
 import { Suspense } from "react";
 import { getCategories, getPublishedPostsPage } from "@/lib/data";
 import { PostList } from "@/components/blog/PostList";
@@ -6,11 +7,28 @@ import { BlogExplorer } from "@/components/blog/BlogExplorer";
 import { BlogPagination } from "@/components/blog/BlogPagination";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const metadata: Metadata = {
-  title: "Reviews & buying guides",
-  description:
-    "Search and filter AI-written product reviews across kitchen, tech, fitness, and home categories.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const title = "Reviews & buying guides";
+  const description =
+    "Search and filter AI-written product reviews across kitchen, tech, fitness, and home categories.";
+  const url = `${siteUrl()}/blog`;
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${title} | ReviewMax`,
+      description,
+      url,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ReviewMax`,
+      description,
+    },
+  };
+}
 
 export const revalidate = 3600;
 

@@ -2,17 +2,35 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
+import { siteUrl } from "@/lib/utils";
 import { getCategories, getPublishedPosts } from "@/lib/data";
 import { ReviewCard } from "@/components/review/ReviewCard";
 import { NewsletterSignup } from "@/components/common/NewsletterSignup";
 import { Button } from "@/components/ui/button";
 import { categoryIconForSlug } from "@/lib/category-icons";
 
-export const metadata: Metadata = {
-  title: "Honest product reviews",
-  description:
-    "Featured and latest AI-researched reviews, categories, and newsletter—smarter buying without the fluff.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const title = "Honest product reviews";
+  const description =
+    "Featured and latest AI-researched reviews, categories, and newsletter—smarter buying without the fluff.";
+  const url = siteUrl();
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${title} | ReviewMax`,
+      description,
+      url,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ReviewMax`,
+      description,
+    },
+  };
+}
 
 export const revalidate = 3600;
 

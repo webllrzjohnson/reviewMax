@@ -23,20 +23,19 @@ export const NewsletterSchema = z.object({
 
 export type NewsletterInput = z.infer<typeof NewsletterSchema>;
 
+/** Payload accepted by POST /api/webhook/n8n (n8n → ReviewMax). */
 export const WebhookPayloadSchema = z.object({
   title: z.string().min(1).max(500),
   slug: z.string().min(1).max(200).regex(slugRegex),
   excerpt: z.string().min(1).max(2000),
   body: z.string().min(1),
-  category_slug: z.string().min(1).regex(slugRegex),
+  category_id: z.string().uuid("category_id must be a valid UUID"),
   rating: z.number().min(0).max(5),
   pros: z.array(z.string().min(1)).min(1),
   cons: z.array(z.string().min(1)).min(1),
   verdict: z.string().min(1).max(2000),
   amazon_url: z.string().url(),
-  image_url: z.string().url().nullable().optional(),
-  is_published: z.boolean().optional().default(true),
-  published_at: z.string().optional(),
+  image_url: z.union([z.string().url(), z.null()]).optional(),
 });
 
 export type WebhookPayload = z.infer<typeof WebhookPayloadSchema>;

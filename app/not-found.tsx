@@ -1,5 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { siteUrl } from "@/lib/utils";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const url = `${siteUrl()}/not-found`;
+  return {
+    title: "Page not found",
+    description:
+      "The page you requested is missing. Return to ReviewMax home or browse published reviews.",
+    robots: { index: false, follow: true },
+    alternates: { canonical: url },
+  };
+}
 
 export default function NotFoundPage() {
   return (
