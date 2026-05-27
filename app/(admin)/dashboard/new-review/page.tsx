@@ -9,8 +9,9 @@ export default async function NewReviewPage() {
   if (!categories.length) {
     return (
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100">
-        No categories found in Supabase. Run <code>supabase/schema.sql</code>{" "}
-        first, then refresh this page.
+        No categories found in the database. Run{" "}
+        <code>npm run db:migrate</code> and <code>npm run db:seed</code>, then
+        refresh this page.
       </div>
     );
   }

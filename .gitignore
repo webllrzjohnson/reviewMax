@@ -19,7 +19,10 @@
 # misc
 .DS_Store
 *.pem
-@notes.txt
+
+# scratch notes at repo root (not part of the app)
+/*.txt
+/notes.txt
 
 # debug
 npm-debug.log*

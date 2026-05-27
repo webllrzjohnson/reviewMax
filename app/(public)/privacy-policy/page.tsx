@@ -44,17 +44,19 @@ export default function PrivacyPolicyPage() {
 
         <h2>Who we are</h2>
         <p>
-          ReviewMax is a product-review website. Hosting runs on Vercel; structured
-          data lives in Supabase; optional analytics use PostHog after you consent;
-          error monitoring may use Sentry when configured. Those vendors process
-          data under their respective terms as subprocessors assisting us.
+          ReviewMax is a product-review website. The app and database are
+          self-hosted (for example on a VPS via Coolify); optional analytics use
+          PostHog after you consent; error monitoring may use Sentry when
+          configured. Those vendors process data under their respective terms as
+          subprocessors assisting us.
         </p>
 
         <h2>What we collect</h2>
         <ul>
           <li>
             <strong>Newsletter:</strong> If you subscribe, we store your email
-            address in Supabase to send updates you opted into. Unsubscribe flows
+            address in our PostgreSQL database to send updates you opted into.
+            Unsubscribe flows
             are provided in outbound messages whenever the newsletter is active.
           </li>
           <li>
@@ -64,9 +66,9 @@ export default function PrivacyPolicyPage() {
             used in aggregate to understand how readers use the Site.
           </li>
           <li>
-            <strong>Administrators:</strong> If you sign into the dashboard, Supabase
-            Auth handles credentials. We associate your account with profile and
-            role records so server actions can authorize admin-only routes.
+            <strong>Administrators:</strong> If you sign into the dashboard, Auth.js
+            handles credentials. We associate your account with a user record so
+            server actions can authorize admin-only routes.
           </li>
           <li>
             <strong>Server and security logs:</strong> Like most hosted sites,
@@ -111,16 +113,15 @@ export default function PrivacyPolicyPage() {
           retired by the operator; infrastructure logs expire per vendor defaults
           unless a longer retention is contractually justified (for example fraud
           investigation). Administrators should apply appropriate retention policies
-          in Supabase for historical tables.
+          for historical tables in the database.
         </p>
 
         <h2>Security</h2>
         <p>
-          We transmit data using HTTPS where the platform provides it and rely on
-          Supabase row-level policies and authenticated server actions for
-          sensitive operations. Protect service-role keys and webhook secrets—they
-          grant full database access—and rotate them according to your security
-          plan.
+          We transmit data using HTTPS where the platform provides it and enforce
+          admin-only access in application code and authenticated server actions for
+          sensitive operations. Protect webhook secrets and database credentials—they
+          grant full database access—and rotate them according to your security plan.
         </p>
 
         <h2>Your choices and rights</h2>
@@ -143,7 +144,7 @@ export default function PrivacyPolicyPage() {
         <h2>International transfers</h2>
 
         <p>
-          Servers for Vercel, Supabase, PostHog, and Sentry may be located outside
+          Servers for your hosting provider, PostHog, and Sentry may be located outside
           your country. Providers may rely on contractual safeguards acceptable
           under applicable regulations.
         </p>

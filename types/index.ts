@@ -1,10 +1,10 @@
 /**
- * ReviewMax — shared app types and Supabase schema re-exports.
+ * ReviewMax — shared app types.
  */
 
-export type { Database, Json, Tables, TablesInsert, TablesUpdate, UserRole } from "./supabase";
+export type UserRole = "admin" | "user";
 
-export type AdminRole = "admin" | "user";
+export type AdminRole = UserRole;
 
 export interface Category {
   id: string;
@@ -59,6 +59,15 @@ export interface AdminUser {
   role: AdminRole;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  role: AdminRole;
+  full_name: string | null;
+  created_at: string;
+}
+
+/** @deprecated Use `User` instead. Kept for backward compatibility in UI copy. */
 export interface Profile {
   id: string;
   role: AdminRole;

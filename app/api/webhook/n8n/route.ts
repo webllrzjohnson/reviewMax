@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
-import { createServiceRoleClient } from "@/lib/supabase/admin";
+import { db } from "@/lib/db";
+import { posts } from "@/lib/db/schema";
 import { WebhookPayloadSchema } from "@/lib/validations";
 
 const HEADER_SECRET = "x-webhook-secret";
@@ -37,44 +38,45 @@ export async function POST(request: NextRequest) {
     }
 
     const payload = parsed.data;
+    const publishedAt = new Date().toISOString();
 
-    let supabase;
     try {
-      supabase = createServiceRoleClient();
-    } catch (e) {
-      console.error("webhook: Supabase service client", e);
-      return json(
-        { success: false, error: "Database configuration error" },
-        500,
-      );
-    }
+      const [inserted] = await db
+        .insert(posts)
+        .values({
+          title: payload.title,
+          slug: payload.slug,
+          excerpt: payload.excerpt,
+          body: payload.body,
+          categoryId: payload.category_id,
+          rating: payload.rating.toString(),
+          pros: payload.pros,
+          cons: payload.cons,
+          verdict: payload.verdict,
+          amazonUrl: payload.amazon_url,
+          imageUrl: payload.image_url ?? null,
+          isPublished: true,
+          publishedAt,
+        })
+        .returning({ id: posts.id });
 
-    const published_at = new Date().toISOString();
+      if (!inserted) {
+        return json({ success: false, error: "Database error" }, 500);
+      }
 
-    const row = {
-      title: payload.title,
-      slug: payload.slug,
-      excerpt: payload.excerpt,
-      body: payload.body,
-      category_id: payload.category_id,
-      rating: payload.rating,
-      pros: payload.pros,
-      cons: payload.cons,
-      verdict: payload.verdict,
-      amazon_url: payload.amazon_url,
-      image_url: payload.image_url ?? null,
-      is_published: true,
-      published_at,
-    };
+      revalidatePath("/");
+      revalidatePath("/blog");
 
-    const { data, error: insertError } = await supabase
-      .from("posts")
-      .insert(row)
-      .select("id")
-      .single();
+      return json({ success: true, id: inserted.id }, 200);
+    } catch (error) {
+      const code =
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        typeof error.code === "string"
+          ? error.code
+          : undefined;
 
-    if (insertError || !data) {
-      const code = insertError?.code;
       if (code === "23505") {
         return json(
           { success: false, error: "A post with this slug already exists" },
@@ -87,22 +89,18 @@ export async function POST(request: NextRequest) {
           400,
         );
       }
-      console.error("webhook: insert error", insertError);
+
+      console.error("webhook: insert error", error);
       return json(
         {
           success: false,
           error: "Database error",
-          code: code ?? undefined,
-          message: insertError?.message,
+          code,
+          message: error instanceof Error ? error.message : undefined,
         },
         500,
       );
     }
-
-    revalidatePath("/");
-    revalidatePath("/blog");
-
-    return json({ success: true, id: data.id }, 200);
   } catch (e) {
     console.error("webhook: unexpected", e);
     return json(

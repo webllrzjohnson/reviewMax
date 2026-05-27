@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { posts } from "@/lib/db/schema";
+import { requireAdmin } from "@/lib/auth/session";
 
 export type PostActionState = { ok: boolean; message?: string };
 
@@ -10,38 +13,28 @@ export async function setPostPublished(
   is_published: boolean,
 ): Promise<PostActionState> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return { ok: false, message: "Not signed in." };
+    await requireAdmin();
+
+    const [post] = await db
+      .select({ publishedAt: posts.publishedAt })
+      .from(posts)
+      .where(eq(posts.id, id))
+      .limit(1);
+
+    if (!post) {
+      return { ok: false, message: "Post not found." };
     }
 
-    const { data: post } = await supabase
-      .from("posts")
-      .select("published_at")
-      .eq("id", id)
-      .single();
-
-    const payload: {
-      is_published: boolean;
-      published_at?: string | null;
-    } = { is_published };
-
-    if (is_published && post && !post.published_at) {
-      payload.published_at = new Date().toISOString();
-    }
-
-    const { error } = await supabase
-      .from("posts")
-      .update(payload)
-      .eq("id", id);
-
-    if (error) {
-      console.warn("setPostPublished", error);
-      return { ok: false, message: "Could not update post." };
-    }
+    await db
+      .update(posts)
+      .set({
+        isPublished: is_published,
+        publishedAt:
+          is_published && !post.publishedAt
+            ? new Date().toISOString()
+            : post.publishedAt,
+      })
+      .where(eq(posts.id, id));
 
     revalidatePath("/dashboard/posts");
     revalidatePath("/dashboard");
@@ -56,20 +49,9 @@ export async function setPostPublished(
 
 export async function deletePost(id: string): Promise<PostActionState> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return { ok: false, message: "Not signed in." };
-    }
+    await requireAdmin();
 
-    const { error } = await supabase.from("posts").delete().eq("id", id);
-
-    if (error) {
-      console.warn("deletePost", error);
-      return { ok: false, message: "Could not delete post." };
-    }
+    await db.delete(posts).where(eq(posts.id, id));
 
     revalidatePath("/dashboard/posts");
     revalidatePath("/dashboard");

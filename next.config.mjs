@@ -3,6 +3,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 import { isSentryConfigured } from "./sentry-env.mjs";
 
 const nextConfig = {
+  output: "standalone",
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.googleusercontent.com" },

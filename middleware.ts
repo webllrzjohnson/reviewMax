@@ -1,9 +1,32 @@
-import { type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
+import NextAuth from "next-auth";
+import { NextResponse } from "next/server";
+import { authConfig } from "@/auth.config";
 
-export async function middleware(request: NextRequest) {
-  return updateSession(request);
-}
+const { auth } = NextAuth(authConfig);
+
+export default auth((request) => {
+  const path = request.nextUrl.pathname;
+
+  if (!path.startsWith("/dashboard")) {
+    return NextResponse.next();
+  }
+
+  if (!request.auth) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/login";
+    redirectUrl.searchParams.set("next", `${path}${request.nextUrl.search}`);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (request.auth.user?.role !== "admin") {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: [

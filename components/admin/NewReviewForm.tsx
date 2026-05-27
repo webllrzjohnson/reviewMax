@@ -144,7 +144,7 @@ export function NewReviewForm({ categories }: { categories: Category[] }) {
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Stored as <code>category_slug</code> in Supabase.
+                Stored as <code>category_slug</code> in the database.
               </p>
             )}
           </div>

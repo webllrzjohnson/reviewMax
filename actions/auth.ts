@@ -1,8 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { AuthError } from "next-auth";
+import { signIn as authSignIn, signOut as authSignOut } from "@/auth";
 
 export type SignInState = {
   error?: string;
@@ -16,8 +15,7 @@ function safeInternalPath(next: string | null): string {
 }
 
 /**
- * Email/password sign-in. Sets auth cookies via Supabase SSR client.
- * On success, redirects to `next` (hidden form field, internal paths only).
+ * Email/password sign-in for admin users via Auth.js credentials provider.
  */
 export async function signIn(
   _prevState: SignInState,
@@ -37,26 +35,28 @@ export async function signIn(
     return { error: "Enter your email and password." };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email.trim(),
-    password,
-  });
-
-  if (error) {
-    return { error: error.message };
+  try {
+    await authSignIn("credentials", {
+      email: email.trim(),
+      password,
+      redirectTo: next,
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          return { error: "Invalid email or password." };
+        default:
+          return { error: "Could not sign in. Try again." };
+      }
+    }
+    throw error;
   }
 
-  revalidatePath("/", "layout");
-  redirect(next);
+  return {};
 }
 
-/**
- * Signs out the current user and clears the Supabase session cookies.
- */
+/** Signs out the current admin session. */
 export async function signOut(): Promise<void> {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  revalidatePath("/", "layout");
-  redirect("/");
+  await authSignOut({ redirectTo: "/" });
 }

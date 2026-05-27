@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
+import { reviewRequests } from "@/lib/db/schema";
+import { requireAdmin } from "@/lib/auth/session";
 import {
   ReviewRequestSchema,
   type ReviewRequestInput,
@@ -30,28 +32,18 @@ export async function submitReviewRequestAction(
   }
 
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const session = await requireAdmin();
 
-    if (!user) {
-      return { ok: false, message: "You must be signed in." };
-    }
-
-    const { error } = await supabase.from("review_requests").insert({
-      product_name: parsed.data.product_name,
-      category_slug: parsed.data.category,
-      amazon_url: parsed.data.amazon_url,
+    await db.insert(reviewRequests).values({
+      productName: parsed.data.product_name,
+      categorySlug: parsed.data.category,
+      amazonUrl: parsed.data.amazon_url,
       notes:
         parsed.data.notes != null && parsed.data.notes.trim() !== ""
           ? parsed.data.notes.trim()
           : null,
+      createdBy: session.user.id,
     });
-    if (error) {
-      console.error("review_requests insert", error);
-      return { ok: false, message: "Could not save request." };
-    }
 
     const webhookUrl = process.env.N8N_REVIEW_WEBHOOK_URL;
 

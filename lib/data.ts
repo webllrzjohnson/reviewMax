@@ -1,60 +1,89 @@
-import { createClient } from "@/lib/supabase/server";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  ilike,
+  ne,
+  sql,
+} from "drizzle-orm";
+import { db } from "@/lib/db";
+import { mapCategory, mapPostWithCategory } from "@/lib/db/mappers";
+import { categories, posts } from "@/lib/db/schema";
 import type { Category, PostWithCategory } from "@/types";
 
 export async function getCategories(): Promise<Category[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name", { ascending: true });
-  if (error) {
+  try {
+    const rows = await db
+      .select()
+      .from(categories)
+      .orderBy(categories.name);
+    return rows.map(mapCategory);
+  } catch (error) {
     console.warn("getCategories", error);
     return [];
   }
-  return data ?? [];
 }
 
 export async function getCategoryBySlug(
   slug: string,
 ): Promise<Category | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("categories")
-    .select("*")
-    .eq("slug", slug)
-    .single();
-  if (error) return null;
-  return data;
+  try {
+    const [row] = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.slug, slug))
+      .limit(1);
+    return row ? mapCategory(row) : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Published posts with category, newest first. */
-export async function getPublishedPosts(limit = 50): Promise<PostWithCategory[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*, category:categories(*)")
-    .eq("is_published", true)
-    .order("published_at", { ascending: false })
-    .limit(limit);
-  if (error) {
+export async function getPublishedPosts(
+  limit = 50,
+): Promise<PostWithCategory[]> {
+  try {
+    const rows = await db
+      .select({
+        post: posts,
+        category: categories,
+      })
+      .from(posts)
+      .innerJoin(categories, eq(posts.categoryId, categories.id))
+      .where(eq(posts.isPublished, true))
+      .orderBy(desc(posts.publishedAt))
+      .limit(limit);
+
+    return rows.map(({ post, category }) =>
+      mapPostWithCategory({ ...post, category }),
+    );
+  } catch (error) {
     console.warn("getPublishedPosts", error);
     return [];
   }
-  return (data as PostWithCategory[]) ?? [];
 }
 
 export async function getPostBySlug(
   slug: string,
 ): Promise<PostWithCategory | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*, category:categories(*)")
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .single();
-  if (error) return null;
-  return data as PostWithCategory;
+  try {
+    const [row] = await db
+      .select({
+        post: posts,
+        category: categories,
+      })
+      .from(posts)
+      .innerJoin(categories, eq(posts.categoryId, categories.id))
+      .where(and(eq(posts.slug, slug), eq(posts.isPublished, true)))
+      .limit(1);
+
+    if (!row) return null;
+    return mapPostWithCategory({ ...row.post, category: row.category });
+  } catch {
+    return null;
+  }
 }
 
 export async function getPostsByCategorySlug(
@@ -62,18 +91,27 @@ export async function getPostsByCategorySlug(
 ): Promise<PostWithCategory[]> {
   const category = await getCategoryBySlug(categorySlug);
   if (!category) return [];
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*, category:categories(*)")
-    .eq("is_published", true)
-    .eq("category_id", category.id)
-    .order("published_at", { ascending: false });
-  if (error) {
+
+  try {
+    const rows = await db
+      .select({
+        post: posts,
+        category: categories,
+      })
+      .from(posts)
+      .innerJoin(categories, eq(posts.categoryId, categories.id))
+      .where(
+        and(eq(posts.isPublished, true), eq(posts.categoryId, category.id)),
+      )
+      .orderBy(desc(posts.publishedAt));
+
+    return rows.map(({ post, category: cat }) =>
+      mapPostWithCategory({ ...post, category: cat }),
+    );
+  } catch (error) {
     console.warn("getPostsByCategorySlug", error);
     return [];
   }
-  return (data as PostWithCategory[]) ?? [];
 }
 
 export async function getRelatedPosts(
@@ -81,36 +119,58 @@ export async function getRelatedPosts(
   excludeSlug: string,
   limit = 3,
 ): Promise<PostWithCategory[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*, category:categories(*)")
-    .eq("is_published", true)
-    .eq("category_id", categoryId)
-    .neq("slug", excludeSlug)
-    .order("published_at", { ascending: false })
-    .limit(limit);
-  if (error) {
+  try {
+    const rows = await db
+      .select({
+        post: posts,
+        category: categories,
+      })
+      .from(posts)
+      .innerJoin(categories, eq(posts.categoryId, categories.id))
+      .where(
+        and(
+          eq(posts.isPublished, true),
+          eq(posts.categoryId, categoryId),
+          ne(posts.slug, excludeSlug),
+        ),
+      )
+      .orderBy(desc(posts.publishedAt))
+      .limit(limit);
+
+    return rows.map(({ post, category }) =>
+      mapPostWithCategory({ ...post, category }),
+    );
+  } catch (error) {
     console.warn("getRelatedPosts", error);
     return [];
   }
-  return (data as PostWithCategory[]) ?? [];
 }
 
-export async function getPopularPosts(limit = 5): Promise<PostWithCategory[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*, category:categories(*)")
-    .eq("is_published", true)
-    .order("rating", { ascending: false, nullsFirst: false })
-    .order("published_at", { ascending: false })
-    .limit(limit);
-  if (error) {
+export async function getPopularPosts(
+  limit = 5,
+): Promise<PostWithCategory[]> {
+  try {
+    const rows = await db
+      .select({
+        post: posts,
+        category: categories,
+      })
+      .from(posts)
+      .innerJoin(categories, eq(posts.categoryId, categories.id))
+      .where(eq(posts.isPublished, true))
+      .orderBy(
+        sql`${posts.rating} desc nulls last`,
+        desc(posts.publishedAt),
+      )
+      .limit(limit);
+
+    return rows.map(({ post, category }) =>
+      mapPostWithCategory({ ...post, category }),
+    );
+  } catch (error) {
     console.warn("getPopularPosts", error);
     return [];
   }
-  return (data as PostWithCategory[]) ?? [];
 }
 
 export type PostsPageResult = {
@@ -126,41 +186,53 @@ export async function getPublishedPostsPage(params: {
 }): Promise<PostsPageResult> {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(48, Math.max(1, params.pageSize ?? 9));
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
+  const offset = (page - 1) * pageSize;
 
-  const supabase = await createClient();
-  let query = supabase
-    .from("posts")
-    .select("*, category:categories(*)", { count: "exact" })
-    .eq("is_published", true);
+  const filters = [eq(posts.isPublished, true)];
 
   if (params.q?.trim()) {
     const safe = params.q.trim().replace(/[%_]/g, " ").slice(0, 80);
     if (safe.length > 0) {
-      query = query.ilike("title", `%${safe}%`);
+      filters.push(ilike(posts.title, `%${safe}%`));
     }
   }
 
   if (params.categorySlug) {
-    const cat = await getCategoryBySlug(params.categorySlug);
-    if (!cat) {
+    const category = await getCategoryBySlug(params.categorySlug);
+    if (!category) {
       return { posts: [], total: 0 };
     }
-    query = query.eq("category_id", cat.id);
+    filters.push(eq(posts.categoryId, category.id));
   }
 
-  const { data, error, count } = await query
-    .order("published_at", { ascending: false })
-    .range(from, to);
+  const whereClause = and(...filters);
 
-  if (error) {
+  try {
+    const [totalRow] = await db
+      .select({ total: count() })
+      .from(posts)
+      .where(whereClause);
+
+    const rows = await db
+      .select({
+        post: posts,
+        category: categories,
+      })
+      .from(posts)
+      .innerJoin(categories, eq(posts.categoryId, categories.id))
+      .where(whereClause)
+      .orderBy(desc(posts.publishedAt))
+      .limit(pageSize)
+      .offset(offset);
+
+    return {
+      posts: rows.map(({ post, category }) =>
+        mapPostWithCategory({ ...post, category }),
+      ),
+      total: Number(totalRow?.total ?? 0),
+    };
+  } catch (error) {
     console.warn("getPublishedPostsPage", error);
     return { posts: [], total: 0 };
   }
-
-  return {
-    posts: (data as PostWithCategory[]) ?? [],
-    total: count ?? 0,
-  };
 }

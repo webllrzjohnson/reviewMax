@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
+import { newsletterSubscribers } from "@/lib/db/schema";
 import { NewsletterSchema } from "@/lib/validations";
 
 export type NewsletterState = {
@@ -10,8 +11,7 @@ export type NewsletterState = {
 };
 
 /**
- * Validates email with NewsletterSchema and upserts into `newsletter_subscribers`
- * (idempotent for existing addresses via `ignoreDuplicates`).
+ * Validates email with NewsletterSchema and upserts into `newsletter_subscribers`.
  */
 export async function subscribeToNewsletter(
   _prev: NewsletterState,
@@ -27,16 +27,10 @@ export async function subscribeToNewsletter(
   const email = parsed.data.email.trim().toLowerCase();
 
   try {
-    const supabase = await createClient();
-    const { error } = await supabase.from("newsletter_subscribers").upsert(
-      { email },
-      { onConflict: "email", ignoreDuplicates: true },
-    );
-
-    if (error) {
-      console.error("newsletter upsert", error);
-      return { ok: false, message: "Could not subscribe. Try again later." };
-    }
+    await db
+      .insert(newsletterSubscribers)
+      .values({ email })
+      .onConflictDoNothing({ target: newsletterSubscribers.email });
 
     revalidatePath("/");
     revalidatePath("/dashboard");
