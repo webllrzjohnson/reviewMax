@@ -62,12 +62,23 @@ npm run db:seed
 
 ## 4. n8n automation
 
-1. Admin form posts to `N8N_REVIEW_WEBHOOK_URL` (optional) after inserting into `review_requests`.
-2. Workflow steps: receive payload → Claude API → image upload → **HTTP Request** to  
-   `https://YOUR_DOMAIN/api/webhook/n8n` with:
-   - Header `X-Webhook-Secret: <same as WEBHOOK_SECRET>`
-   - JSON body matching `WebhookPayloadSchema` in `lib/validations.ts` (`category_id` must exist in `categories`).
-3. The webhook inserts into `posts` and triggers `revalidatePath` for ISR.
+Full step-by-step guide: **docs/N8N.md**
+
+Summary:
+
+1. Create an n8n workflow with Webhook path `review-request`.
+2. Set `N8N_REVIEW_WEBHOOK_URL` in ReviewMax to the n8n production webhook URL.
+3. Workflow: Webhook → Claude (Anthropic) → `POST /api/webhook/n8n` on ReviewMax.
+4. Use the same `WEBHOOK_SECRET` in ReviewMax and both n8n HTTP headers.
+5. n8n must call a **public** ReviewMax URL (not `localhost` from your PC).
+
+Code snippets for n8n Code nodes: `n8n/code/`
+
+Test publish webhook locally:
+
+```powershell
+npm run test:webhook
+```
 
 ## 5. Post-deploy checklist
 

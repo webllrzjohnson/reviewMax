@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { reviewRequests } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
+import { getCategoryBySlug } from "@/lib/data";
 import {
   ReviewRequestSchema,
   type ReviewRequestInput,
@@ -46,10 +47,13 @@ export async function submitReviewRequestAction(
     });
 
     const webhookUrl = process.env.N8N_REVIEW_WEBHOOK_URL;
+    let n8nOk = true;
 
     if (webhookUrl) {
+      const category = await getCategoryBySlug(parsed.data.category);
+
       try {
-        await fetch(webhookUrl, {
+        const response = await fetch(webhookUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -58,6 +62,7 @@ export async function submitReviewRequestAction(
           body: JSON.stringify({
             product_name: parsed.data.product_name,
             category: parsed.data.category,
+            category_id: category?.id ?? null,
             amazon_url: parsed.data.amazon_url,
             notes:
               parsed.data.notes != null && parsed.data.notes.trim() !== ""
@@ -65,7 +70,13 @@ export async function submitReviewRequestAction(
                 : null,
           }),
         });
+
+        if (!response.ok) {
+          n8nOk = false;
+          console.error("n8n webhook", response.status, await response.text());
+        }
       } catch (e) {
+        n8nOk = false;
         console.error("n8n webhook", e);
       }
     }
@@ -73,8 +84,11 @@ export async function submitReviewRequestAction(
     revalidatePath("/dashboard");
     return {
       ok: true,
-      message:
-        "Request saved. n8n will pick up the webhook and can publish via your API route when ready.",
+      message: webhookUrl
+        ? n8nOk
+          ? "Request saved and sent to n8n for generation."
+          : "Request saved, but n8n did not accept the webhook. Check your n8n URL and workflow."
+        : "Request saved. Set N8N_REVIEW_WEBHOOK_URL in .env.local to trigger automation.",
     };
   } catch (e) {
     console.error(e);

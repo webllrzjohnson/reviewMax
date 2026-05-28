@@ -21,7 +21,9 @@ AI-assisted Amazon affiliate review site built with Next.js, PostgreSQL, Auth.js
    ```
 5. Open http://localhost:3000 and sign in at `/login` with `ADMIN_EMAIL` / `ADMIN_INITIAL_PASSWORD` from `.env.local`.
 
-See **DEPLOYMENT.md** for Coolify/VPS production deployment and n8n automation.
+See **DEPLOYMENT.md** for Coolify/VPS production deployment.
+
+**n8n automation:** import the workflow — see **`n8n/SETUP.md`**
 
 ## Scripts
 

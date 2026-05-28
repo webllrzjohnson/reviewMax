@@ -11,7 +11,9 @@
     "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
     "db:create": "tsx --env-file=.env.local scripts/setup-local-db.ts",
     "db:setup": "npm run db:create && npm run db:migrate && npm run db:seed",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "test:webhook": "tsx --env-file=.env.local scripts/test-webhook.ts",
+    "n8n:build-workflow": "tsx scripts/build-n8n-workflow.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
