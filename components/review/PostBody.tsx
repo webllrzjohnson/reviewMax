@@ -1,4 +1,4 @@
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -21,7 +21,22 @@ export function PostBody({ body }: { body: string }) {
       <div
         className={proseClass}
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(body, { USE_PROFILES: { html: true } }),
+          __html: sanitizeHtml(body, {
+            allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+              "img",
+              "h1",
+              "h2",
+              "h3",
+              "h4",
+              "h5",
+              "h6",
+            ]),
+            allowedAttributes: {
+              ...sanitizeHtml.defaults.allowedAttributes,
+              img: ["src", "srcset", "alt", "title", "width", "height", "loading"],
+              a: ["href", "name", "target", "rel"],
+            },
+          }),
         }}
       />
     );
