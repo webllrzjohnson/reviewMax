@@ -1,0 +1,7 @@
+# Pin nixpkgs so Node.js is >= 22.13 (required by jsdom / isomorphic-dompurify).
+# Default Coolify/Nixpacks archive ships Node 22.11, which breaks `next build`.
+[phases.setup]
+nixpkgsArchive = "51ad838b03a05b1de6f9f2a0fffecee64a9788ee"
+
+[variables]
+NIXPACKS_NODE_VERSION = "22"
