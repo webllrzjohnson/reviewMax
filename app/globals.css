@@ -115,7 +115,6 @@
     --sidebar-ring: oklch(0.72 0.13 68);
   }
   .theme {
-    --font-heading: var(--font-sans);
     --font-sans: var(--font-sans);
   }
   * {
