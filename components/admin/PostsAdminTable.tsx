@@ -5,7 +5,7 @@ import { useTransition } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import type { PostWithCategory } from "@/types";
-import { deletePost, setPostPublished } from "@/actions/posts";
+import { deletePost, retryPostImage, setPostPublished } from "@/actions/posts";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,7 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
             <th className="px-4 py-3 font-medium">Rating</th>
             <th className="px-4 py-3 font-medium">Published</th>
             <th className="px-4 py-3 font-medium">Status</th>
+            <th className="px-4 py-3 font-medium">Image</th>
             <th className="px-4 py-3 font-medium text-right">Actions</th>
           </tr>
         </thead>
@@ -86,6 +87,35 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
                 >
                   {post.is_published ? "Published" : "Draft"}
                 </Badge>
+              </td>
+              <td className="px-4 py-3 align-top">
+                {post.image_url ? (
+                  <span className="text-xs text-green-600">✓</span>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto px-1 py-0 text-xs text-amber-600 hover:text-amber-700"
+                    disabled={pending}
+                    onClick={() =>
+                      startTransition(async () => {
+                        toast.loading("Fetching image from Amazon…", {
+                          id: `img-${post.id}`,
+                        });
+                        const result = await retryPostImage(post.id);
+                        toast.dismiss(`img-${post.id}`);
+                        if (!result.ok) {
+                          toast.error(result.message ?? "Could not fetch image.");
+                        } else {
+                          toast.success("Image updated.");
+                          refresh();
+                        }
+                      })
+                    }
+                  >
+                    ⚠ Retry
+                  </Button>
+                )}
               </td>
               <td className="px-4 py-3 align-top text-right">
                 <div className="flex flex-wrap items-center justify-end gap-2">

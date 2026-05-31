@@ -82,6 +82,44 @@ function revalidatePostPaths(slug?: string) {
   }
 }
 
+export async function retryPostImage(id: string): Promise<PostActionState> {
+  try {
+    await requireAdmin();
+
+    const [post] = await db
+      .select({ slug: posts.slug, amazonUrl: posts.amazonUrl })
+      .from(posts)
+      .where(eq(posts.id, id))
+      .limit(1);
+
+    if (!post) return { ok: false, message: "Post not found." };
+
+    const imageUrl = await resolveAmazonProductImageUrl(post.amazonUrl);
+    if (!imageUrl) {
+      return {
+        ok: false,
+        message:
+          "Could not resolve an image from Amazon. Paste the image URL manually in the post editor.",
+      };
+    }
+
+    await db
+      .update(posts)
+      .set({ imageUrl, updatedAt: new Date().toISOString() })
+      .where(eq(posts.id, id));
+
+    revalidatePostPaths(post.slug);
+    return { ok: true, message: "Image updated." };
+  } catch (e) {
+    console.warn(e);
+    const message =
+      e instanceof Error && e.message === "Unauthorized"
+        ? "Your session expired. Sign in again."
+        : "Something went wrong.";
+    return { ok: false, message };
+  }
+}
+
 export async function setPostPublished(
   id: string,
   is_published: boolean,
