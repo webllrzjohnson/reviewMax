@@ -29,6 +29,12 @@ export default function AdminDashboardShellLayout({
               New post
             </Link>
             <Link
+              href="/dashboard/categories"
+              className="text-primary hover:underline"
+            >
+              Categories
+            </Link>
+            <Link
               href="/dashboard/new-review"
               className="text-primary hover:underline"
             >

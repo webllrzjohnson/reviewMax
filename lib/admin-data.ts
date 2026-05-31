@@ -1,6 +1,6 @@
 import { count, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { mapPostWithCategory, mapReviewRequest } from "@/lib/db/mappers";
+import { mapCategory, mapPostWithCategory, mapReviewRequest } from "@/lib/db/mappers";
 import {
   categories,
   newsletterSubscribers,
@@ -8,7 +8,7 @@ import {
   reviewRequests,
 } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
-import type { PostWithCategory, ReviewRequest } from "@/types";
+import type { Category, PostWithCategory, ReviewRequest } from "@/types";
 
 export type AdminDashboardData = {
   email: string;
@@ -71,6 +71,43 @@ export async function getAdminPostById(
 
   if (!row) return null;
   return mapPostWithCategory({ ...row.post, category: row.category });
+}
+
+export type AdminCategory = Category & { postCount: number };
+
+export async function getAdminCategories(): Promise<AdminCategory[]> {
+  await requireAdmin();
+  try {
+    const rows = await db
+      .select({ category: categories, postCount: count(posts.id) })
+      .from(categories)
+      .leftJoin(posts, eq(categories.id, posts.categoryId))
+      .groupBy(categories.id)
+      .orderBy(categories.name);
+    return rows.map(({ category, postCount }) => ({
+      ...mapCategory(category),
+      postCount: Number(postCount),
+    }));
+  } catch (error) {
+    console.warn("getAdminCategories", error);
+    return [];
+  }
+}
+
+export async function getAdminCategoryById(
+  id: string,
+): Promise<Category | null> {
+  await requireAdmin();
+  try {
+    const [row] = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.id, id))
+      .limit(1);
+    return row ? mapCategory(row) : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getAdminPosts(): Promise<PostWithCategory[]> {

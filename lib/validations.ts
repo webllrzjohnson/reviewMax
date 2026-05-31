@@ -71,3 +71,15 @@ export const PostEditorSchema = z.object({
 });
 
 export type PostEditorInput = z.infer<typeof PostEditorSchema>;
+
+export const CategorySchema = z.object({
+  name: z.string().min(1, "Name is required").max(100),
+  slug: z
+    .string()
+    .min(1, "Slug is required")
+    .max(100)
+    .regex(slugRegex, "Use lowercase letters, numbers, and hyphens"),
+  description: z.string().max(500).optional(),
+});
+
+export type CategoryInput = z.infer<typeof CategorySchema>;

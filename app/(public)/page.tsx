@@ -53,12 +53,16 @@ export default async function HomePage() {
   return (
     <PublicShell>
       <div className="space-y-12 sm:space-y-16">
-        <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/12 via-background to-background px-5 py-12 shadow-sm sm:px-10 sm:py-14">
+        <section className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background px-5 py-14 sm:px-10 sm:py-20">
+          {/* Subtle radial glow behind the headline */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="h-72 w-72 rounded-full bg-primary/8 blur-3xl" />
+          </div>
           <div className="relative z-10 mx-auto max-w-3xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-primary">
+            <span className="inline-block rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-primary ring-1 ring-primary/25">
               Verdict
-            </p>
-            <h1 className="mt-4 text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+            </span>
+            <h1 className="mt-5 text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
               Unbiased reviews for smarter buying decisions
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
@@ -72,7 +76,7 @@ export default async function HomePage() {
                   Search reviews
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+              <Button asChild size="lg" variant="outline" className="w-full border-primary/30 sm:w-auto hover:bg-primary/5">
                 <Link href="/blog">Browse all</Link>
               </Button>
             </div>
@@ -110,27 +114,26 @@ export default async function HomePage() {
               Jump into the topics we cover most
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {activeCategories.map((c) => {
               const Icon = categoryIconForSlug(c.slug);
               return (
                 <Link
                   key={c.id}
                   href={`/category/${c.slug}`}
-                  className="group flex items-start gap-4 rounded-xl border bg-card p-5 shadow-sm transition-all hover:border-primary/25 hover:shadow-md"
+                  className="group flex flex-col items-center gap-3 rounded-2xl border bg-card px-4 py-7 text-center transition-colors hover:border-primary/40 hover:bg-primary/5"
                 >
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
-                    <Icon className="h-6 w-6" aria-hidden />
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                    <Icon className="h-7 w-7" aria-hidden />
                   </span>
-                  <span className="min-w-0">
-                    <span className="block font-semibold leading-snug">
-                      {c.name}
+                  <span className="font-semibold leading-snug">{c.name}</span>
+                  {c.description ? (
+                    <span className="line-clamp-2 text-sm text-muted-foreground">
+                      {c.description}
                     </span>
-                    {c.description ? (
-                      <span className="mt-1 line-clamp-2 block text-sm text-muted-foreground">
-                        {c.description}
-                      </span>
-                    ) : null}
+                  ) : null}
+                  <span className="mt-1 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                    Browse &rarr;
                   </span>
                 </Link>
               );

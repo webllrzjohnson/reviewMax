@@ -10,6 +10,17 @@ import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
   const router = useRouter();
@@ -110,34 +121,51 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
                     />
                     Live
                   </label>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    disabled={pending}
-                    onClick={() => {
-                      if (
-                        !window.confirm(
-                          `Delete “${post.title}”? This cannot be undone.`,
-                        )
-                      ) {
-                        return;
-                      }
-                      startTransition(async () => {
-                        const result = await deletePost(post.id);
-                        if (!result.ok) {
-                          toast.error(
-                            result.message ?? "Could not delete post.",
-                          );
-                          return;
-                        }
-                        toast.success("Post deleted.");
-                        refresh();
-                      });
-                    }}
-                  >
-                    Delete
-                  </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        disabled={pending}
+                      >
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Delete this post permanently?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          &ldquo;{post.title}&rdquo; will be permanently removed
+                          from the database. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() =>
+                            startTransition(async () => {
+                              const result = await deletePost(post.id);
+                              if (!result.ok) {
+                                toast.error(
+                                  result.message ?? "Could not delete post.",
+                                );
+                                return;
+                              }
+                              toast.success("Post deleted.");
+                              refresh();
+                            })
+                          }
+                        >
+                          Delete permanently
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </td>
             </tr>

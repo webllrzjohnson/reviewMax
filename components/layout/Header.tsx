@@ -16,7 +16,7 @@ export async function Header({ className }: { className?: string }) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        "sticky top-0 z-40 w-full border-b border-zinc-800 bg-zinc-900",
         className,
       )}
     >
@@ -24,7 +24,7 @@ export async function Header({ className }: { className?: string }) {
         <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
           <Link
             href="/"
-            className="shrink-0 text-lg font-bold tracking-tight text-foreground"
+            className="shrink-0 text-lg font-bold tracking-tight text-orange-400 hover:text-orange-300 transition-colors"
           >
             Verdict
           </Link>
@@ -39,7 +39,7 @@ export async function Header({ className }: { className?: string }) {
             <Link
               key={c.id}
               href={`/category/${c.slug}`}
-              className="whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground"
+              className="whitespace-nowrap text-zinc-300 transition-colors hover:text-white"
             >
               {c.name}
             </Link>
@@ -47,16 +47,20 @@ export async function Header({ className }: { className?: string }) {
         </nav>
 
         <div className="flex flex-1 items-center justify-end gap-1 sm:gap-2">
-          <Button variant="ghost" size="icon" asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            asChild
+            className="text-zinc-300 hover:bg-zinc-800 hover:text-white"
+          >
             <Link href="/blog" aria-label="Search reviews">
               <Search className="h-5 w-5" />
             </Link>
           </Button>
           <Button
-            variant="outline"
             size="sm"
             asChild
-            className="hidden sm:inline-flex"
+            className="hidden sm:inline-flex border border-zinc-600 bg-transparent text-zinc-200 hover:bg-zinc-700 hover:text-white"
           >
             <Link href={adminHref}>{adminLabel}</Link>
           </Button>
