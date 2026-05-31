@@ -7,6 +7,9 @@ const ASIN_PATTERNS = [
 
 const AMAZON_IMAGE_HOST = /^https:\/\/(?:m\.media-amazon\.com|images(?:-na)?\.ssl-images-amazon\.com)\//i;
 
+const SHORT_LINK_HOST =
+  /^(?:https?:\/\/)?(?:a\.co|amzn\.to|amzn\.com|amzn\.asia|amzn\.eu)\//i;
+
 /** Extract a 10-character ASIN from common Amazon product URLs. */
 export function extractAsinFromAmazonUrl(url: string): string | null {
   for (const pattern of ASIN_PATTERNS) {
@@ -14,6 +17,45 @@ export function extractAsinFromAmazonUrl(url: string): string | null {
     if (match?.[1]) return match[1].toUpperCase();
   }
   return null;
+}
+
+/**
+ * Follows Amazon short links (a.co, amzn.to) and returns the final product URL.
+ * If the URL already contains an ASIN, returns it unchanged (without query string).
+ */
+export async function expandAmazonProductUrl(url: string): Promise<string> {
+  const trimmed = url.trim();
+  if (!trimmed) return trimmed;
+
+  if (extractAsinFromAmazonUrl(trimmed)) {
+    return trimmed.split("?")[0];
+  }
+
+  if (!SHORT_LINK_HOST.test(trimmed)) {
+    return trimmed;
+  }
+
+  try {
+    const response = await fetch(trimmed, {
+      method: "GET",
+      redirect: "follow",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      signal: AbortSignal.timeout(15_000),
+    });
+
+    const finalUrl = response.url || trimmed;
+    if (extractAsinFromAmazonUrl(finalUrl)) {
+      return finalUrl.split("?")[0];
+    }
+  } catch {
+    // keep original
+  }
+
+  return trimmed;
 }
 
 function normalizeAmazonImageUrl(raw: string): string | null {
@@ -102,11 +144,12 @@ async function bestReachableImageUrl(urls: string[]): Promise<string | null> {
 export async function resolveAmazonProductImageUrl(
   amazonUrl: string,
 ): Promise<string | null> {
-  const asin = extractAsinFromAmazonUrl(amazonUrl);
+  const expanded = await expandAmazonProductUrl(amazonUrl);
+  const asin = extractAsinFromAmazonUrl(expanded);
   if (!asin) return null;
 
-  const productUrl = amazonUrl.includes("/dp/")
-    ? amazonUrl.split("?")[0]
+  const productUrl = expanded.includes("/dp/")
+    ? expanded.split("?")[0]
     : `https://www.amazon.com/dp/${asin}`;
 
   try {

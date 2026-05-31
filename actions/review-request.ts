@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { reviewRequests } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
+import { expandAmazonProductUrl } from "@/lib/amazon-image";
 import { getCategoryBySlug } from "@/lib/data";
 import {
   ReviewRequestSchema,
@@ -34,11 +35,12 @@ export async function submitReviewRequestAction(
 
   try {
     const session = await requireAdmin();
+    const amazonUrl = await expandAmazonProductUrl(parsed.data.amazon_url);
 
     await db.insert(reviewRequests).values({
       productName: parsed.data.product_name,
       categorySlug: parsed.data.category,
-      amazonUrl: parsed.data.amazon_url,
+      amazonUrl,
       notes:
         parsed.data.notes != null && parsed.data.notes.trim() !== ""
           ? parsed.data.notes.trim()
@@ -63,7 +65,7 @@ export async function submitReviewRequestAction(
             product_name: parsed.data.product_name,
             category: parsed.data.category,
             category_id: category?.id ?? null,
-            amazon_url: parsed.data.amazon_url,
+            amazon_url: amazonUrl,
             notes:
               parsed.data.notes != null && parsed.data.notes.trim() !== ""
                 ? parsed.data.notes.trim()
