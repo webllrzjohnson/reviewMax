@@ -60,7 +60,7 @@ npm run db:migrate
 npm run db:seed
 ```
 
-Re-run `npm run db:migrate` after pulling updates that add SQL files under `drizzle/` (e.g. `0001_post_gallery.sql`).
+Re-run `npm run db:migrate` after pulling updates that add SQL files under `drizzle/` (e.g. `0001_post_gallery.sql`). Uses `DATABASE_URL` from Coolify env (no `.env.local` in production).
 
 ## 4. n8n automation
 

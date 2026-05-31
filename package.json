@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start -H 0.0.0.0",
     "lint": "next lint",
-    "db:migrate": "tsx --env-file=.env.local scripts/migrate.ts",
+    "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
     "db:create": "tsx --env-file=.env.local scripts/setup-local-db.ts",
     "db:setup": "npm run db:create && npm run db:migrate && npm run db:seed",
