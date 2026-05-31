@@ -62,11 +62,19 @@ export function ReviewDetail({
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
           {post.title}
         </h1>
-        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
           {post.published_at ? (
             <time dateTime={post.published_at}>
               Published {formatDate(post.published_at)}
             </time>
+          ) : null}
+          {post.amazon_url ? (
+            <span>
+              Contains{" "}
+              <a href="/affiliate-disclosure" className="underline hover:text-foreground">
+                affiliate links
+              </a>
+            </span>
           ) : null}
         </div>
         <StarRating rating={post.rating} className="pt-2" />
@@ -176,7 +184,7 @@ function JsonLd({ post }: { post: PostWithCategory }) {
       ratingValue: post.rating ?? undefined,
       bestRating: 5,
     },
-    author: { "@type": "Organization", name: "ReviewMax" },
+    author: { "@type": "Organization", name: "Verdict" },
     reviewBody: post.verdict,
   };
 
@@ -187,7 +195,7 @@ function JsonLd({ post }: { post: PostWithCategory }) {
     description: post.excerpt,
     datePublished: post.published_at ?? undefined,
     image: post.image_url ? [post.image_url] : [fallbackImage],
-    author: { "@type": "Organization", name: "ReviewMax" },
+    author: { "@type": "Organization", name: "Verdict" },
     mainEntityOfPage: url,
   };
 

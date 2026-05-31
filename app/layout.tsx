@@ -19,15 +19,16 @@ const geist = Geist({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "ReviewMax — AI-powered product reviews",
-    template: "%s | ReviewMax",
+    default:
+      "Verdict — Unbiased Product Reviews for Kitchen, Tech & Fitness Gear",
+    template: "%s | Verdict",
   },
   description:
-    "Honest, AI-researched product reviews and buying guides. Find kitchen, tech, fitness, and home picks with clear pros, cons, and verdicts.",
+    "Honest product reviews and buying guides. Find kitchen gadgets, home tech, and fitness gear picks with clear pros, cons, star ratings, and verdicts.",
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "ReviewMax",
+    siteName: "Verdict",
   },
 };
 

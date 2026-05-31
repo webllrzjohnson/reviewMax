@@ -10,21 +10,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Reviews & buying guides";
   const description =
-    "Search and filter AI-written product reviews across kitchen, tech, fitness, and home categories.";
+    "Search and filter product reviews across kitchen, tech, fitness, and home categories.";
   const url = `${siteUrl()}/blog`;
   return {
     title,
     description,
     alternates: { canonical: url },
     openGraph: {
-      title: `${title} | ReviewMax`,
+      title: `${title} | Verdict`,
       description,
       url,
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | ReviewMax`,
+      title: `${title} | Verdict`,
       description,
     },
   };

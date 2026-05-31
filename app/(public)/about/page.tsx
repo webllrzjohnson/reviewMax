@@ -8,22 +8,22 @@ const path = "/about";
 
 export async function generateMetadata(): Promise<Metadata> {
   const url = `${siteUrl()}${path}`;
-  const title = "About ReviewMax";
+  const title = "About Verdict";
   const description =
-    "ReviewMax publishes AI-assisted Amazon product reviews: how topics are picked, editorial standards, and how affiliate links fund the site.";
+    "Verdict publishes independent Amazon product reviews: how topics are picked, editorial standards, and how affiliate links fund the site.";
   return {
     title,
     description,
     alternates: { canonical: url },
     openGraph: {
-      title: `${title} | ReviewMax`,
+      title,
       description,
       url,
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | ReviewMax`,
+      title,
       description,
     },
   };
@@ -35,11 +35,11 @@ export default function AboutPage() {
   return (
     <PublicShell>
       <article className="prose prose-neutral dark:prose-invert max-w-none">
-        <h1>About ReviewMax</h1>
+        <h1>About Verdict</h1>
 
-        <h2>What ReviewMax is</h2>
+        <h2>What Verdict is</h2>
         <p>
-          ReviewMax is an editorial publication focused on practical product
+          Verdict is an editorial publication focused on practical product
           reviews and buying guides. Each article summarizes research into a
           specific product category or model, organizes findings into strengths
           and tradeoffs, assigns a concise star rating, and ends with a clear
@@ -66,7 +66,7 @@ export default function AboutPage() {
 
         <h2>Affiliate disclosure notice</h2>
         <p>
-          ReviewMax is a participant in the Amazon Associates program. Links that
+          Verdict is a participant in the Amazon Associates program. Links that
           go to Amazon on this site may include our tracking parameter; when
           you buy qualifying items after clicking, we may earn a commission at
           no additional cost to you. That arrangement helps pay hosting and tools

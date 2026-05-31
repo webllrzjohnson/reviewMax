@@ -26,7 +26,7 @@ export async function Header({ className }: { className?: string }) {
             href="/"
             className="shrink-0 text-lg font-bold tracking-tight text-foreground"
           >
-            ReviewMax
+            Verdict
           </Link>
           <HeaderNavMobile categories={categories} />
         </div>

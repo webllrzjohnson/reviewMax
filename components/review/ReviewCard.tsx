@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StarRating } from "@/components/review/StarRating";
 import { Badge } from "@/components/ui/badge";
 import { ReviewCardImage } from "@/components/review/ReviewCardImage";
+import { formatDate } from "@/lib/utils";
 
 export function ReviewCard({
   post,
@@ -32,6 +33,14 @@ export function ReviewCard({
             {post.title}
           </h3>
           <StarRating rating={post.rating} className="pt-1" />
+          {post.published_at && (
+            <time
+              dateTime={post.published_at}
+              className="text-xs text-muted-foreground"
+            >
+              {formatDate(post.published_at)}
+            </time>
+          )}
         </CardHeader>
         <CardContent>
           <p className="line-clamp-3 text-sm text-muted-foreground">

@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       category.description ??
       `Product reviews and guides in the ${category.name} category.`,
     openGraph: {
-      title: `${category.name} | ReviewMax`,
+      title: `${category.name} | Verdict`,
       description: category.description ?? undefined,
       url: `${siteUrl()}/category/${category.slug}`,
     },

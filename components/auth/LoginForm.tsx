@@ -39,7 +39,7 @@ export function LoginForm({ defaultNext }: { defaultNext: string }) {
       <CardHeader>
         <CardTitle>Admin sign in</CardTitle>
         <CardDescription>
-          ReviewMax dashboard is restricted to accounts with the admin role.
+          Verdict dashboard is restricted to accounts with the admin role.
         </CardDescription>
       </CardHeader>
       <CardContent>

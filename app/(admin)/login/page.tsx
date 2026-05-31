@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Sign in",
-  description: "Admin sign in for ReviewMax",
+  description: "Admin sign in for Verdict",
 };
 
 type Props = {

@@ -9,20 +9,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const url = `${siteUrl()}${path}`;
   const title = "Affiliate disclosure";
   const description =
-    "Federal Trade Commission-aligned disclosure for ReviewMax participation in Amazon Associates and similar programs.";
+    "Federal Trade Commission-aligned disclosure for Verdict participation in Amazon Associates and similar programs.";
   return {
     title,
     description,
     alternates: { canonical: url },
     openGraph: {
-      title: `${title} | ReviewMax`,
+      title: `${title} | Verdict`,
       description,
       url,
       type: "website",
     },
     twitter: {
       card: "summary",
-      title: `${title} | ReviewMax`,
+      title: `${title} | Verdict`,
       description,
     },
   };
@@ -45,12 +45,12 @@ export default function AffiliateDisclosurePage() {
 
         <h2>Compensated relationships</h2>
         <p>
-          ReviewMax (“ReviewMax”, “we”, or “us”) may earn referral compensation
+          Verdict (“Verdict”, “we”, or “us”) may earn referral compensation
           when you click certain outbound links—principally links to amazon.com—and
           complete a qualifying purchase or
           other qualifying action described by that retailer&apos;s affiliate
           program. Amazon and the Amazon logo are trademarks of Amazon.com,
-          Inc., or its affiliates. ReviewMax is not endorsed by Amazon. Program
+          Inc., or its affiliates. Verdict is not endorsed by Amazon. Program
           details, commission structures, eligible products, and reporting are
           governed entirely by Amazon&apos;s (or another merchant&apos;s)
           current operating agreement—not by this disclosure page.
@@ -83,7 +83,7 @@ export default function AffiliateDisclosurePage() {
           information, ingredient lists (where relevant), compatibility, regional
           availability, taxes, shipping, returns, recalls, regulatory notices,
           and star averages on retailer pages can change hourly. Information on
-          ReviewMax was accurate to the knowledge of editors at publication time
+          Verdict was accurate to the knowledge of editors at publication time
           but is not a substitute for reading the retailer&apos;s own listing or
           contacting manufacturers for safety-critical contexts (e.g., medical
           devices, lithium batteries, childcare items). If something looks
@@ -105,7 +105,7 @@ export default function AffiliateDisclosurePage() {
 
         <h2>Where to find complementary policies</h2>
         <p>
-          For personal data ReviewMax collects directly (newsletter signup,
+          For personal data Verdict collects directly (newsletter signup,
           optional analytics consent, authenticated admin dashboards), consult the{" "}
           <Link href="/privacy-policy">Privacy Policy</Link>. General conditions
           of using the domain appear in{" "}

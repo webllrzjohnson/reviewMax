@@ -9,20 +9,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const url = `${siteUrl()}${path}`;
   const title = "Privacy policy";
   const description =
-    "ReviewMax privacy practices: newsletter data, authentication, cookies, analytics, subprocessors, and your choices.";
+    "Verdict privacy practices: newsletter data, authentication, cookies, analytics, subprocessors, and your choices.";
   return {
     title,
     description,
     alternates: { canonical: url },
     openGraph: {
-      title: `${title} | ReviewMax`,
+      title: `${title} | Verdict`,
       description,
       url,
       type: "website",
     },
     twitter: {
       card: "summary",
-      title: `${title} | ReviewMax`,
+      title: `${title} | Verdict`,
       description,
     },
   };
@@ -37,14 +37,14 @@ export default function PrivacyPolicyPage() {
         <h1>Privacy policy</h1>
         <p className="lead">
           <strong>Last updated:</strong> May 3, 2026. This Privacy Policy explains
-          how ReviewMax collects, uses, stores, and protects information when you
+          how Verdict collects, uses, stores, and protects information when you
           use this website (“Site”). For general rules of using the Site, see our{" "}
           <Link href="/terms">Terms of use</Link>.
         </p>
 
         <h2>Who we are</h2>
         <p>
-          ReviewMax is a product-review website. The app and database are
+          Verdict is a product-review website. The app and database are
           self-hosted (for example on a VPS via Coolify); optional analytics use
           PostHog after you consent; error monitoring may use Sentry when
           configured. Those vendors process data under their respective terms as
@@ -135,7 +135,7 @@ export default function PrivacyPolicyPage() {
 
         <h2>Children</h2>
         <p>
-          ReviewMax does not knowingly collect personal information from children
+          Verdict does not knowingly collect personal information from children
           under 13 where U.S. Children’s Online Privacy Protection Act rules apply,
           or under higher age thresholds where local law mandates. If you believe a
           child provided data, notify the Site operator so records can be removed.
@@ -159,7 +159,7 @@ export default function PrivacyPolicyPage() {
         <h2>Contact</h2>
         <p>
           For privacy questions or requests exercising legal rights, contact the
-          legally designated operator administering this ReviewMax deployment.
+          legally designated operator administering this Verdict deployment.
           Operational contact surfaces (email, ticket system, postal address where
           required) belong to your organization and should be published where end
           users expect regulatory correspondence.

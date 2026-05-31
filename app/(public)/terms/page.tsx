@@ -8,20 +8,20 @@ const path = "/terms";
 export async function generateMetadata(): Promise<Metadata> {
   const url = `${siteUrl()}${path}`;
   const title = "Terms of use";
-  const description = "Terms governing your use of ReviewMax.";
+  const description = "Terms governing your use of Verdict.";
   return {
     title,
     description,
     alternates: { canonical: url },
     openGraph: {
-      title: `${title} | ReviewMax`,
+      title: `${title} | Verdict`,
       description,
       url,
       type: "website",
     },
     twitter: {
       card: "summary",
-      title: `${title} | ReviewMax`,
+      title: `${title} | Verdict`,
       description,
     },
   };
@@ -39,13 +39,13 @@ export default function TermsPage() {
       </p>
       <h2>Acceptance</h2>
       <p>
-        By accessing ReviewMax (&quot;Site&quot;) you agree to these Terms of use (&quot;Terms&quot;)
+        By accessing Verdict (&quot;Site&quot;) you agree to these Terms of use (&quot;Terms&quot;)
         and our{" "}
         <Link href="/privacy-policy">Privacy Policy</Link>. Monetised storefront links disclose
         programme commitments in our{" "}
         <Link href="/affiliate-disclosure">Affiliate disclosure</Link>. Operators may revise these Terms
         by posting updates with a refreshed effective date. Continuing to browse after updates ordinarily
-        signals renewed acceptance unless your jurisdiction requires a stronger ritual. Stop using ReviewMax if
+        signals renewed acceptance unless your jurisdiction requires a stronger ritual. Stop using Verdict if
         you disagree.
       </p>
       <h2>Conduct</h2>
@@ -73,7 +73,7 @@ export default function TermsPage() {
       </p>
       <h2>Limitation of liability</h2>
       <p>
-        To the fullest extent permitted by law, ReviewMax is not liable for indirect or consequential damages
+        To the fullest extent permitted by law, Verdict is not liable for indirect or consequential damages
         arising from your use of the Site even if foreseeable. Total cumulative liability for claims tied to these
         Terms or the browsing experience described here shall not exceed USD $150 except where mandatory law
         requires otherwise.

@@ -10,23 +10,24 @@ import { Button } from "@/components/ui/button";
 import { categoryIconForSlug } from "@/lib/category-icons";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Honest product reviews";
+  const title =
+    "Verdict — Unbiased Product Reviews for Kitchen, Tech & Fitness Gear";
   const description =
-    "Featured and latest AI-researched reviews, categories, and newsletter—smarter buying without the fluff.";
+    "Clear pros, cons, star ratings, and verdicts across kitchen gadgets, home tech, and fitness gear. Smarter buying decisions, without the fluff.";
   const url = siteUrl();
   return {
     title,
     description,
     alternates: { canonical: url },
     openGraph: {
-      title: `${title} | ReviewMax`,
+      title,
       description,
       url,
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | ReviewMax`,
+      title,
       description,
     },
   };
@@ -43,16 +44,22 @@ export default async function HomePage() {
   const featured = orderedPosts.slice(0, 3);
   const latest = orderedPosts.slice(3, 9);
 
+  // Only surface categories that actually have published posts
+  const categoryIdsWithPosts = new Set(orderedPosts.map((p) => p.category_id));
+  const activeCategories = categories.filter((c) =>
+    categoryIdsWithPosts.has(c.id),
+  );
+
   return (
     <PublicShell>
       <div className="space-y-12 sm:space-y-16">
         <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/12 via-background to-background px-5 py-12 shadow-sm sm:px-10 sm:py-14">
           <div className="relative z-10 mx-auto max-w-3xl text-center">
             <p className="text-sm font-semibold uppercase tracking-widest text-primary">
-              ReviewMax
+              Verdict
             </p>
             <h1 className="mt-4 text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-              AI-researched reviews for smarter buying decisions
+              Unbiased reviews for smarter buying decisions
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
               Clear pros, cons, star ratings, and verdicts across kitchen,
@@ -104,7 +111,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            {categories.map((c) => {
+            {activeCategories.map((c) => {
               const Icon = categoryIconForSlug(c.slug);
               return (
                 <Link
@@ -131,23 +138,24 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="space-y-6">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight">Latest reviews</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Fresh posts after the featured picks
-              </p>
+        {latest.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">
+                  Latest reviews
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Fresh posts after the featured picks
+                </p>
+              </div>
+              <Link
+                href="/blog"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Open blog
+              </Link>
             </div>
-            <Link
-              href="/blog"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              Open blog
-            </Link>
-          </div>
-
-          {latest.length > 0 ? (
             <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
               {latest.map((post) => (
                 <div
@@ -161,16 +169,8 @@ export default async function HomePage() {
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              More reviews are on the way. Browse the{" "}
-              <Link href="/blog" className="font-medium text-primary underline">
-                full archive
-              </Link>
-              .
-            </p>
-          )}
-        </section>
+          </section>
+        )}
 
         <section aria-labelledby="newsletter-heading">
           <h2 id="newsletter-heading" className="sr-only">

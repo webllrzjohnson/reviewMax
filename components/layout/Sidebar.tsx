@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getCategories, getPopularPosts } from "@/lib/data";
-import { NewsletterSignup } from "@/components/common/NewsletterSignup";
 import { Separator } from "@/components/ui/separator";
 import { categoryIconForSlug } from "@/lib/category-icons";
 
@@ -51,8 +50,6 @@ export async function Sidebar() {
           })}
         </ul>
       </div>
-      <Separator />
-      <NewsletterSignup compact />
     </div>
   );
 }

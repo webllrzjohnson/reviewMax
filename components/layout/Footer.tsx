@@ -35,13 +35,13 @@ export function Footer() {
         </nav>
 
         <p className="mx-auto mt-8 max-w-3xl text-center text-sm text-muted-foreground">
-          As an Amazon Associate, ReviewMax earns from qualifying purchases.
+          As an Amazon Associate, Verdict earns from qualifying purchases.
           Prices and availability change; always verify details on the
           retailer&apos;s site before you buy.
         </p>
 
         <p className="mt-8 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} ReviewMax. All rights reserved.
+          © {new Date().getFullYear()} Verdict. All rights reserved.
         </p>
       </div>
     </footer>
