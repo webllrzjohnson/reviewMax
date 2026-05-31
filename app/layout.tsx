@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { Toaster } from "sonner";
@@ -14,6 +14,12 @@ import { siteUrl, cn } from "@/lib/utils";
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  weight: ["400", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -43,6 +49,7 @@ export default function RootLayout({
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
           geist.variable,
+          playfair.variable,
         )}
       >
         <AppProviders>

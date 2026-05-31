@@ -59,7 +59,7 @@ export function ReviewDetail({
         {post.category ? (
           <Badge variant="secondary">{post.category.name}</Badge>
         ) : null}
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
           {post.title}
         </h1>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
@@ -81,15 +81,23 @@ export function ReviewDetail({
       </header>
 
       <aside
-        className="rounded-xl border-2 border-amber-200/90 bg-gradient-to-br from-amber-50 via-amber-50/80 to-background p-5 shadow-sm dark:border-amber-900/60 dark:from-amber-950/40 dark:via-amber-950/25 dark:to-background"
+        className="rounded-xl border border-[#16A34A]/25 bg-[#16A34A]/5 p-5 dark:border-[#22C55E]/20 dark:bg-[#22C55E]/8"
         aria-labelledby="quick-verdict-heading"
       >
-        <p
-          id="quick-verdict-heading"
-          className="text-sm font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-100"
-        >
-          Quick verdict
-        </p>
+        <div className="flex items-center gap-2">
+          <p
+            id="quick-verdict-heading"
+            className="text-sm font-semibold uppercase tracking-wide text-[#16A34A] dark:text-[#22C55E]"
+          >
+            Verdict
+          </p>
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#16A34A] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+            <svg className="h-2.5 w-2.5" viewBox="0 0 12 12" fill="none" aria-hidden>
+              <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Verified
+          </span>
+        </div>
         <p className="mt-3 text-base font-medium leading-relaxed">
           {post.verdict}
         </p>

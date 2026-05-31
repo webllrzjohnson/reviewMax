@@ -53,16 +53,12 @@ export default async function HomePage() {
   return (
     <PublicShell>
       <div className="space-y-12 sm:space-y-16">
-        <section className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background px-5 py-14 sm:px-10 sm:py-20">
-          {/* Subtle radial glow behind the headline */}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="h-72 w-72 rounded-full bg-primary/8 blur-3xl" />
-          </div>
+        <section className="relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/8 via-card to-card px-5 py-14 sm:px-10 sm:py-20">
           <div className="relative z-10 mx-auto max-w-3xl text-center">
-            <span className="inline-block rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-primary ring-1 ring-primary/25">
+            <span className="inline-block rounded-full bg-primary px-4 py-1 text-xs font-semibold uppercase tracking-widest text-primary-foreground">
               Verdict
             </span>
-            <h1 className="mt-5 text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+            <h1 className="mt-5 font-heading text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
               Unbiased reviews for smarter buying decisions
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
@@ -86,7 +82,7 @@ export default async function HomePage() {
         <section className="space-y-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">
+              <h2 className="font-heading text-2xl font-bold tracking-tight">
                 Featured reviews
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -109,7 +105,7 @@ export default async function HomePage() {
 
         <section className="space-y-6">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Shop by category</h2>
+            <h2 className="font-heading text-2xl font-bold tracking-tight">Shop by category</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Jump into the topics we cover most
             </p>
@@ -145,7 +141,7 @@ export default async function HomePage() {
           <section className="space-y-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight">
+                <h2 className="font-heading text-2xl font-bold tracking-tight">
                   Latest reviews
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">

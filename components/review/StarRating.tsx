@@ -25,8 +25,8 @@ export function StarRating({
             className={cn(
               "h-4 w-4",
               filled
-                ? "fill-amber-400 text-amber-400"
-                : "text-muted-foreground/40",
+                ? "fill-[#C98B1A] text-[#C98B1A]"
+                : "text-muted-foreground/30",
             )}
           />
         );

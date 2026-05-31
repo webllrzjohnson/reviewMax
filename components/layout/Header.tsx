@@ -24,7 +24,7 @@ export async function Header({ className }: { className?: string }) {
         <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
           <Link
             href="/"
-            className="shrink-0 text-lg font-bold tracking-tight text-orange-400 hover:text-orange-300 transition-colors"
+            className="shrink-0 font-heading text-xl font-bold tracking-tight text-[#C98B1A] hover:text-[#D4981E] transition-colors"
           >
             Verdict
           </Link>
