@@ -29,11 +29,11 @@ Return ONLY valid JSON (no markdown fences) matching this schema:
   "rating": 0-5 number with one decimal,
   "pros": ["string", ...],
   "cons": ["string", ...],
-  "verdict": "2-4 sentence summary",
-  "image_url": null or https URL
+  "verdict": "2-4 sentence summary"
 }
 Use slug starting with: ${slugBase}-review
-Do not invent fake test results; write plausible editorial tone.`;
+Do not invent fake test results; write plausible editorial tone.
+Product images are fetched from Amazon when the review is published — do not include image_url.`;
 
 const user = `Product: ${productName}
 Category slug: ${categorySlug}

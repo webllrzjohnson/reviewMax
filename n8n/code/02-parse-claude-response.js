@@ -49,7 +49,7 @@ return [
       cons: Array.isArray(draft.cons) ? draft.cons.map(String) : [],
       verdict: String(draft.verdict ?? "").slice(0, 2000),
       amazon_url: prev.amazon_url,
-      image_url: draft.image_url ?? null,
+      image_url: null,
     },
   },
 ];

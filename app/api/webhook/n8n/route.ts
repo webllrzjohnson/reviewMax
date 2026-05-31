@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { posts } from "@/lib/db/schema";
+import { resolveAmazonProductImageUrl } from "@/lib/amazon-image";
 import { WebhookPayloadSchema } from "@/lib/validations";
 
 const HEADER_SECRET = "x-webhook-secret";
@@ -38,6 +39,12 @@ export async function POST(request: NextRequest) {
     }
 
     const payload = parsed.data;
+
+    let imageUrl = payload.image_url ?? null;
+    if (!imageUrl) {
+      imageUrl = await resolveAmazonProductImageUrl(payload.amazon_url);
+    }
+
     const publishedAt = new Date().toISOString();
 
     try {
@@ -54,7 +61,7 @@ export async function POST(request: NextRequest) {
           cons: payload.cons,
           verdict: payload.verdict,
           amazonUrl: payload.amazon_url,
-          imageUrl: payload.image_url ?? null,
+          imageUrl,
           isPublished: true,
           publishedAt,
         })
