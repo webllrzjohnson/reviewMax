@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { auth } from "@/auth";
 import { getCategories } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { HeaderNavMobile } from "@/components/layout/HeaderNavMobile";
 
 export async function Header({ className }: { className?: string }) {
-  const categories = await getCategories();
+  const [categories, session] = await Promise.all([getCategories(), auth()]);
   const navCategories = categories.slice(0, 5);
+  const adminHref =
+    session?.user?.role === "admin" ? "/dashboard" : "/login";
+  const adminLabel = session?.user?.role === "admin" ? "Dashboard" : "Admin";
 
   return (
     <header
@@ -54,7 +58,7 @@ export async function Header({ className }: { className?: string }) {
             asChild
             className="hidden sm:inline-flex"
           >
-            <Link href="/login">Admin</Link>
+            <Link href={adminHref}>{adminLabel}</Link>
           </Button>
         </div>
       </div>

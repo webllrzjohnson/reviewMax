@@ -16,12 +16,17 @@ export default async function AdminPostsPage() {
             Posts
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Publish or unpublish reviews, or remove them permanently.
+            Edit, publish, delete, or create reviews manually.
           </p>
         </div>
-        <Button asChild variant="outline">
-          <Link href="/dashboard">← Back to dashboard</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild>
+            <Link href="/dashboard/posts/new">New post</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/dashboard">← Dashboard</Link>
+          </Button>
+        </div>
       </div>
 
       <PostsAdminTable posts={posts} />

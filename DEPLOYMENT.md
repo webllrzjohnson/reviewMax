@@ -60,6 +60,8 @@ npm run db:migrate
 npm run db:seed
 ```
 
+Re-run `npm run db:migrate` after pulling updates that add SQL files under `drizzle/` (e.g. `0001_post_gallery.sql`).
+
 ## 4. n8n automation
 
 Full step-by-step guide: **docs/N8N.md**

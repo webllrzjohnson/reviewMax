@@ -47,6 +47,10 @@ export const posts = pgTable("posts", {
   verdict: text("verdict").notNull(),
   amazonUrl: text("amazon_url").notNull(),
   imageUrl: text("image_url"),
+  galleryUrls: text("gallery_urls")
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
   isPublished: boolean("is_published").notNull().default(false),
   publishedAt: timestamp("published_at", { withTimezone: true, mode: "string" }),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })

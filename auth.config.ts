@@ -1,8 +1,12 @@
 import type { NextAuthConfig } from "next-auth";
 
+const maxAge = 30 * 24 * 60 * 60; // 30 days
+
 export const authConfig = {
   trustHost: true,
-  session: { strategy: "jwt" },
+  secret: process.env.AUTH_SECRET,
+  session: { strategy: "jwt", maxAge },
+  jwt: { maxAge },
   pages: {
     signIn: "/login",
   },

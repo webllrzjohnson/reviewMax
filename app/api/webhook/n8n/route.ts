@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
           verdict: payload.verdict,
           amazonUrl,
           imageUrl,
+          galleryUrls: payload.gallery_urls ?? [],
           isPublished: true,
           publishedAt,
         })

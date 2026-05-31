@@ -42,6 +42,32 @@ export const WebhookPayloadSchema = z.object({
   verdict: z.string().min(1).max(2000),
   amazon_url: z.string().url(),
   image_url: z.union([z.string().url(), z.null()]).optional(),
+  gallery_urls: z.array(z.string().url()).optional(),
 });
 
 export type WebhookPayload = z.infer<typeof WebhookPayloadSchema>;
+
+/** Admin create/edit post form (pros, cons, gallery as newline-separated text). */
+export const PostEditorSchema = z.object({
+  title: z.string().min(1, "Title is required").max(500),
+  slug: z
+    .string()
+    .min(1, "Slug is required")
+    .max(200)
+    .regex(slugRegex, "Use lowercase letters, numbers, and hyphens"),
+  excerpt: z.string().min(1, "Excerpt is required").max(2000),
+  body: z.string().min(1, "Body is required"),
+  category_id: z
+    .string()
+    .regex(uuidLikeRegex, "Select a category"),
+  rating: z.number().min(0).max(5),
+  pros: z.string().min(1, "Add at least one pro (one per line)"),
+  cons: z.string().min(1, "Add at least one con (one per line)"),
+  verdict: z.string().min(1, "Verdict is required").max(2000),
+  amazon_url: z.string().url("Enter a valid product URL"),
+  image_url: z.string().optional(),
+  gallery_urls: z.string().optional(),
+  is_published: z.boolean(),
+});
+
+export type PostEditorInput = z.infer<typeof PostEditorSchema>;

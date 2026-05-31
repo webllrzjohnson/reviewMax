@@ -8,18 +8,26 @@ async function main() {
     throw new Error("DATABASE_URL is required");
   }
 
-  const migrationPath = path.join(process.cwd(), "drizzle", "0000_initial.sql");
-  const content = fs.readFileSync(migrationPath, "utf8");
-  const statements = content
-    .split("--> statement-breakpoint")
-    .map((statement) => statement.trim())
-    .filter(Boolean);
+  const migrationDir = path.join(process.cwd(), "drizzle");
+  const migrationFiles = fs
+    .readdirSync(migrationDir)
+    .filter((name) => name.endsWith(".sql"))
+    .sort();
 
   const sql = postgres(url, { max: 1 });
 
   try {
-    for (const statement of statements) {
-      await sql.unsafe(statement);
+    for (const file of migrationFiles) {
+      const content = fs.readFileSync(path.join(migrationDir, file), "utf8");
+      const statements = content
+        .split("--> statement-breakpoint")
+        .map((statement) => statement.trim())
+        .filter(Boolean);
+
+      for (const statement of statements) {
+        await sql.unsafe(statement);
+      }
+      console.log(`Applied ${file}`);
     }
     console.log("Migration complete");
   } finally {

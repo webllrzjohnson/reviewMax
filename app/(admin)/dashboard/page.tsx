@@ -32,6 +32,9 @@ export default async function DashboardPage() {
             <Link href="/dashboard/new-review">New review request</Link>
           </Button>
           <Button asChild variant="outline">
+            <Link href="/dashboard/posts/new">Create post</Link>
+          </Button>
+          <Button asChild variant="outline">
             <Link href="/dashboard/posts">Manage posts</Link>
           </Button>
         </div>

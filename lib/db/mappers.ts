@@ -33,6 +33,7 @@ export function mapPost(row: PostRow): Post {
     verdict: row.verdict,
     amazon_url: row.amazonUrl,
     image_url: row.imageUrl,
+    gallery_urls: row.galleryUrls ?? [],
     is_published: row.isPublished,
     published_at: row.publishedAt,
     created_at: row.createdAt,

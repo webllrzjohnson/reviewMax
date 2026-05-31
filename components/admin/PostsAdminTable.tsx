@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import type { PostWithCategory } from "@/types";
 import { deletePost, setPostPublished } from "@/actions/posts";
 import { formatDate } from "@/lib/utils";
@@ -17,7 +18,11 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
   if (posts.length === 0) {
     return (
       <div className="rounded-lg border border-dashed bg-muted/30 p-10 text-center text-sm text-muted-foreground">
-        No posts yet. Use your n8n workflow or seed SQL to add content.
+        No posts yet.{" "}
+        <Link href="/dashboard/posts/new" className="text-primary underline">
+          Create one manually
+        </Link>{" "}
+        or use the n8n workflow.
       </div>
     );
   }
@@ -73,6 +78,9 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
               </td>
               <td className="px-4 py-3 align-top text-right">
                 <div className="flex flex-wrap items-center justify-end gap-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/dashboard/posts/${post.id}/edit`}>Edit</Link>
+                  </Button>
                   <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
                     <input
                       type="checkbox"
@@ -81,7 +89,21 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
                       disabled={pending}
                       onChange={() => {
                         startTransition(async () => {
-                          await setPostPublished(post.id, !post.is_published);
+                          const result = await setPostPublished(
+                            post.id,
+                            !post.is_published,
+                          );
+                          if (!result.ok) {
+                            toast.error(
+                              result.message ?? "Could not update status.",
+                            );
+                            return;
+                          }
+                          toast.success(
+                            post.is_published
+                              ? "Post unpublished."
+                              : "Post published.",
+                          );
                           refresh();
                         });
                       }}
@@ -102,7 +124,14 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
                         return;
                       }
                       startTransition(async () => {
-                        await deletePost(post.id);
+                        const result = await deletePost(post.id);
+                        if (!result.ok) {
+                          toast.error(
+                            result.message ?? "Could not delete post.",
+                          );
+                          return;
+                        }
+                        toast.success("Post deleted.");
                         refresh();
                       });
                     }}

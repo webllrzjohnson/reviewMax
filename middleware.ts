@@ -7,6 +7,13 @@ const { auth } = NextAuth(authConfig);
 export default auth((request) => {
   const path = request.nextUrl.pathname;
 
+  if (path === "/login" && request.auth?.user?.role === "admin") {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/dashboard";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
   if (!path.startsWith("/dashboard")) {
     return NextResponse.next();
   }

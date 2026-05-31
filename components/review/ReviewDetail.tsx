@@ -91,6 +91,30 @@ export function ReviewDetail({
 
       <PostBody body={post.body} />
 
+      {post.gallery_urls && post.gallery_urls.length > 0 ? (
+        <section className="space-y-4" aria-labelledby="gallery-heading">
+          <h2 id="gallery-heading" className="text-xl font-bold">
+            More photos
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {post.gallery_urls.map((url) => (
+              <div
+                key={url}
+                className="relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted"
+              >
+                <Image
+                  src={url}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section
         className="rounded-xl border-2 border-[#FF9900]/35 bg-gradient-to-br from-[#FF9900]/18 via-background to-background p-6 shadow-md dark:from-[#FF9900]/10"
         aria-labelledby="where-to-buy-heading"

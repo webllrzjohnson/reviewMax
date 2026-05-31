@@ -27,6 +27,7 @@ export interface Post {
   verdict: string;
   amazon_url: string;
   image_url: string | null;
+  gallery_urls: string[];
   is_published: boolean;
   published_at: string | null;
   created_at: string;

@@ -54,6 +54,25 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   };
 }
 
+export async function getAdminPostById(
+  id: string,
+): Promise<PostWithCategory | null> {
+  await requireAdmin();
+
+  const [row] = await db
+    .select({
+      post: posts,
+      category: categories,
+    })
+    .from(posts)
+    .leftJoin(categories, eq(posts.categoryId, categories.id))
+    .where(eq(posts.id, id))
+    .limit(1);
+
+  if (!row) return null;
+  return mapPostWithCategory({ ...row.post, category: row.category });
+}
+
 export async function getAdminPosts(): Promise<PostWithCategory[]> {
   await requireAdmin();
 
