@@ -2,6 +2,10 @@ import { z } from "zod";
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+/** Matches seeded category/post IDs (Zod .uuid() rejects non-RFC variant bits). */
+const uuidLikeRegex =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const ReviewRequestSchema = z.object({
   product_name: z
     .string()
@@ -29,7 +33,9 @@ export const WebhookPayloadSchema = z.object({
   slug: z.string().min(1).max(200).regex(slugRegex),
   excerpt: z.string().min(1).max(2000),
   body: z.string().min(1),
-  category_id: z.string().uuid("category_id must be a valid UUID"),
+  category_id: z
+    .string()
+    .regex(uuidLikeRegex, "category_id must be a valid UUID"),
   rating: z.number().min(0).max(5),
   pros: z.array(z.string().min(1)).min(1),
   cons: z.array(z.string().min(1)).min(1),
