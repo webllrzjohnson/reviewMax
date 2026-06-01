@@ -2,11 +2,8 @@ import { revalidatePath } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { posts } from "@/lib/db/schema";
-import {
-  coerceProductImageUrl,
-  expandAmazonProductUrl,
-  resolveAmazonProductImageUrl,
-} from "@/lib/amazon-image";
+import { expandAmazonProductUrl, resolveAmazonProductImageUrl } from "@/lib/amazon-image";
+import { coerceProductImageUrl } from "@/lib/image-url";
 import { WebhookPayloadSchema } from "@/lib/validations";
 
 const HEADER_SECRET = "x-webhook-secret";

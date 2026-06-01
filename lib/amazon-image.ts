@@ -5,11 +5,14 @@ const ASIN_PATTERNS = [
   /[?&]asin=([A-Z0-9]{10})/i,
 ];
 
+export {
+  coerceProductImageUrl,
+  isAmazonProductPageUrl,
+  isDirectImageUrl,
+} from "@/lib/image-url";
+
 const AMAZON_IMAGE_HOST =
   /^https:\/\/(?:m\.media-amazon\.com|images(?:-na)?\.ssl-images-amazon\.com)\//i;
-
-const AMAZON_PAGE_HOST =
-  /^(?:https?:\/\/)?(?:[a-z0-9-]+\.)*amazon\.|a\.co|amzn\.(?:to|com|asia|eu)/i;
 
 const SHORT_LINK_HOST =
   /^(?:https?:\/\/)?(?:a\.co|amzn\.to|amzn\.com|amzn\.asia|amzn\.eu)\//i;
@@ -38,52 +41,6 @@ export function extractAsinFromAmazonUrl(url: string): string | null {
     if (match?.[1]) return match[1].toUpperCase();
   }
   return null;
-}
-
-/** True when the URL is an Amazon product/listing page, not a direct image file. */
-export function isAmazonProductPageUrl(url: string): boolean {
-  const trimmed = url.trim();
-  if (!trimmed.startsWith("http")) return false;
-  if (AMAZON_IMAGE_HOST.test(trimmed)) return false;
-  if (SHORT_LINK_HOST.test(trimmed)) return true;
-  if (!AMAZON_PAGE_HOST.test(trimmed)) return false;
-  return (
-    /\/dp\//i.test(trimmed) ||
-    /\/gp\/product\//i.test(trimmed) ||
-    /[?&]asin=/i.test(trimmed)
-  );
-}
-
-/** True when the URL points at a real image asset (not an HTML product page). */
-export function isDirectImageUrl(url: string): boolean {
-  const trimmed = url.trim();
-  if (!trimmed.startsWith("http")) return false;
-  if (isAmazonProductPageUrl(trimmed)) return false;
-
-  if (AMAZON_IMAGE_HOST.test(trimmed)) {
-    // /images/P/{ASIN} paths are placeholders, not product photos
-    if (/\/images\/P\//i.test(trimmed)) return false;
-    return true;
-  }
-
-  try {
-    const { pathname } = new URL(trimmed);
-    return /\.(jpe?g|png|webp|gif|avif)$/i.test(pathname);
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Normalizes a stored image URL from forms/webhooks.
- * Returns null for empty values, Amazon product pages, and invalid URLs.
- */
-export function coerceProductImageUrl(
-  value: string | undefined | null,
-): string | null {
-  const trimmed = value?.trim();
-  if (!trimmed) return null;
-  return isDirectImageUrl(trimmed) ? trimmed : null;
 }
 
 /**
@@ -138,15 +95,19 @@ function normalizeAmazonImageUrl(raw: string): string | null {
   return upscaleAmazonImageUrl(decoded.split("?")[0]);
 }
 
-/** Request a high-resolution variant when Amazon only exposes a thumbnail URL. */
+/** Collapse Amazon size suffixes to a single high-res variant. */
 function upscaleAmazonImageUrl(url: string): string {
-  if (!/\._[A-Z0-9]+_\./i.test(url)) {
-    return url.replace(/\.(jpe?g|png|webp)$/i, "._AC_SL1500_.$1");
-  }
-  return url.replace(
-    /\._(?:SS|SX|SY|US|SR|CR|AC_US|AC_SY|AC_SX|SL)\d+_\./gi,
-    "._AC_SL1500_.",
+  const base = url.split("?")[0];
+  const match = base.match(
+    /^(https:\/\/m\.media-amazon\.com\/images\/I\/[A-Za-z0-9+._%-]+)(?:\._[A-Za-z0-9]+_)*\.(jpe?g|png|webp)$/i,
   );
+  if (match) {
+    return `${match[1]}._AC_SL1500_.${match[2]}`;
+  }
+  if (!/\._[A-Z0-9]+_\./i.test(base)) {
+    return base.replace(/\.(jpe?g|png|webp)$/i, "._AC_SL1500_.$1");
+  }
+  return base.replace(/(\._[A-Za-z0-9]+_)+(?=\.[a-z]+$)/i, "._AC_SL1500_.");
 }
 
 const THUMBNAIL_MARKER =

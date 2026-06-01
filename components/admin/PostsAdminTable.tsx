@@ -6,7 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import type { PostWithCategory } from "@/types";
 import { deletePost, retryPostImage, setPostPublished } from "@/actions/posts";
-import { isDirectImageUrl } from "@/lib/amazon-image";
+import { isDirectImageUrl } from "@/lib/image-url";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { isDirectImageUrl } from "@/lib/amazon-image";
+import { isDirectImageUrl } from "@/lib/image-url";
 
 const PLACEHOLDER =
   "https://placehold.co/800x500/e2e8f0/64748b?text=Product";

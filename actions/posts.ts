@@ -5,11 +5,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { posts } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
-import {
-  coerceProductImageUrl,
-  expandAmazonProductUrl,
-  resolveAmazonProductImageUrl,
-} from "@/lib/amazon-image";
+import { expandAmazonProductUrl, resolveAmazonProductImageUrl } from "@/lib/amazon-image";
+import { coerceProductImageUrl } from "@/lib/image-url";
 import { PostEditorSchema, type PostEditorInput } from "@/lib/validations";
 
 export type PostActionState = { ok: boolean; message?: string; id?: string };
