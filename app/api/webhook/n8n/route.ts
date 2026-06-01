@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { posts } from "@/lib/db/schema";
 import {
+  coerceProductImageUrl,
   expandAmazonProductUrl,
   resolveAmazonProductImageUrl,
 } from "@/lib/amazon-image";
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
     const payload = parsed.data;
     const amazonUrl = await expandAmazonProductUrl(payload.amazon_url);
 
-    let imageUrl = payload.image_url ?? null;
+    let imageUrl = coerceProductImageUrl(payload.image_url);
     if (!imageUrl) {
       imageUrl = await resolveAmazonProductImageUrl(amazonUrl);
     }

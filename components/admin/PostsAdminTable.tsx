@@ -6,6 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import type { PostWithCategory } from "@/types";
 import { deletePost, retryPostImage, setPostPublished } from "@/actions/posts";
+import { isDirectImageUrl } from "@/lib/amazon-image";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -89,7 +90,7 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
                 </Badge>
               </td>
               <td className="px-4 py-3 align-top">
-                {post.image_url ? (
+                {post.image_url && isDirectImageUrl(post.image_url) ? (
                   <span className="text-xs text-green-600">✓</span>
                 ) : (
                   <Button

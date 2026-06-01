@@ -1,5 +1,5 @@
-import Image from "next/image";
 import type { PostWithCategory } from "@/types";
+import { ReviewCardImage } from "@/components/review/ReviewCardImage";
 import { StarRating } from "@/components/review/StarRating";
 import { ProsConsList } from "@/components/review/ProsConsList";
 import { AffiliateButton } from "@/components/review/AffiliateButton";
@@ -22,8 +22,6 @@ export function ReviewDetail({
 }: {
   post: PostWithCategory;
 }) {
-  const src = post.image_url || PLACEHOLDER;
-
   return (
     <article className="space-y-8">
       <BreadcrumbNav
@@ -45,13 +43,11 @@ export function ReviewDetail({
       <div
         className={`relative aspect-[21/9] max-h-[min(70vh,520px)] min-h-[200px] w-full overflow-hidden rounded-none bg-muted sm:rounded-xl ${heroBleedClassName()}`}
       >
-        <Image
-          src={src}
+        <ReviewCardImage
+          src={post.image_url}
           alt={post.title}
-          priority
-          fill
-          className="object-cover"
           sizes="(max-width: 768px) 100vw, min(1152px, 100vw)"
+          priority
         />
       </div>
 

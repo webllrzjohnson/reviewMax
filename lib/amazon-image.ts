@@ -8,8 +8,14 @@ const ASIN_PATTERNS = [
 const AMAZON_IMAGE_HOST =
   /^https:\/\/(?:m\.media-amazon\.com|images(?:-na)?\.ssl-images-amazon\.com)\//i;
 
+const AMAZON_PAGE_HOST =
+  /^(?:https?:\/\/)?(?:[a-z0-9-]+\.)*amazon\.|a\.co|amzn\.(?:to|com|asia|eu)/i;
+
 const SHORT_LINK_HOST =
   /^(?:https?:\/\/)?(?:a\.co|amzn\.to|amzn\.com|amzn\.asia|amzn\.eu)\//i;
+
+/** Amazon returns a 1×1 tracking GIF for invalid /P/{ASIN} paths. */
+const MIN_IMAGE_BYTES = 2_000;
 
 const BROWSER_HEADERS = {
   "User-Agent":
@@ -17,7 +23,6 @@ const BROWSER_HEADERS = {
   Accept:
     "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
   "Accept-Language": "en-US,en;q=0.9",
-  "Accept-Encoding": "gzip, deflate, br",
   "Cache-Control": "no-cache",
   Pragma: "no-cache",
   "Sec-Fetch-Dest": "document",
@@ -33,6 +38,52 @@ export function extractAsinFromAmazonUrl(url: string): string | null {
     if (match?.[1]) return match[1].toUpperCase();
   }
   return null;
+}
+
+/** True when the URL is an Amazon product/listing page, not a direct image file. */
+export function isAmazonProductPageUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed.startsWith("http")) return false;
+  if (AMAZON_IMAGE_HOST.test(trimmed)) return false;
+  if (SHORT_LINK_HOST.test(trimmed)) return true;
+  if (!AMAZON_PAGE_HOST.test(trimmed)) return false;
+  return (
+    /\/dp\//i.test(trimmed) ||
+    /\/gp\/product\//i.test(trimmed) ||
+    /[?&]asin=/i.test(trimmed)
+  );
+}
+
+/** True when the URL points at a real image asset (not an HTML product page). */
+export function isDirectImageUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed.startsWith("http")) return false;
+  if (isAmazonProductPageUrl(trimmed)) return false;
+
+  if (AMAZON_IMAGE_HOST.test(trimmed)) {
+    // /images/P/{ASIN} paths are placeholders, not product photos
+    if (/\/images\/P\//i.test(trimmed)) return false;
+    return true;
+  }
+
+  try {
+    const { pathname } = new URL(trimmed);
+    return /\.(jpe?g|png|webp|gif|avif)$/i.test(pathname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Normalizes a stored image URL from forms/webhooks.
+ * Returns null for empty values, Amazon product pages, and invalid URLs.
+ */
+export function coerceProductImageUrl(
+  value: string | undefined | null,
+): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  return isDirectImageUrl(trimmed) ? trimmed : null;
 }
 
 /**
@@ -70,130 +121,112 @@ export async function expandAmazonProductUrl(url: string): Promise<string> {
   return trimmed;
 }
 
-function normalizeAmazonImageUrl(raw: string): string | null {
-  const decoded = raw
+function decodeAmazonUrl(raw: string): string {
+  return raw
     .replace(/&amp;/g, "&")
     .replace(/\\u002F/g, "/")
     .replace(/\\\//g, "/")
     .trim();
-  if (!decoded.startsWith("http")) return null;
-  if (!AMAZON_IMAGE_HOST.test(decoded)) return null;
-  // Strip query strings and resize suffixes to get the highest-res version
-  const clean = decoded.replace(/\._[A-Z]{2}\d+_/, "._SL1500_");
-  return clean;
 }
 
-function parseImageFromHtml(html: string): string | null {
-  // 1. og:image meta tag
+function normalizeAmazonImageUrl(raw: string): string | null {
+  const decoded = decodeAmazonUrl(raw);
+  if (!decoded.startsWith("http")) return null;
+  if (!AMAZON_IMAGE_HOST.test(decoded)) return null;
+  if (/\/images\/P\//i.test(decoded)) return null;
+  if (/\.(svg|gif)$/i.test(decoded)) return null;
+  return upscaleAmazonImageUrl(decoded.split("?")[0]);
+}
+
+/** Request a high-resolution variant when Amazon only exposes a thumbnail URL. */
+function upscaleAmazonImageUrl(url: string): string {
+  if (!/\._[A-Z0-9]+_\./i.test(url)) {
+    return url.replace(/\.(jpe?g|png|webp)$/i, "._AC_SL1500_.$1");
+  }
+  return url.replace(
+    /\._(?:SS|SX|SY|US|SR|CR|AC_US|AC_SY|AC_SX|SL)\d+_\./gi,
+    "._AC_SL1500_.",
+  );
+}
+
+const THUMBNAIL_MARKER =
+  /\._(?:SS|SX|SY|US|SR|CR|AC_US|AC_SY|AC_SX|SL\d{1,3})_\./i;
+
+function collectAmazonImageCandidates(text: string): string[] {
+  const found = new Set<string>();
+
+  const push = (raw: string | undefined) => {
+    const url = raw ? normalizeAmazonImageUrl(raw) : null;
+    if (url) found.add(url);
+  };
+
   const ogPatterns = [
     /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
     /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
-    /<meta[^>]+property=["']og:image:secure_url["'][^>]+content=["']([^"']+)["']/i,
   ];
   for (const pattern of ogPatterns) {
-    const match = html.match(pattern);
-    const url = match?.[1] ? normalizeAmazonImageUrl(match[1]) : null;
-    if (url) return url;
+    push(text.match(pattern)?.[1]);
   }
 
-  // 2. JavaScript image data — hiRes
-  const hiRes = html.match(/"hiRes"\s*:\s*"(https:\/\/[^"]+)"/);
-  if (hiRes?.[1]) {
-    const url = normalizeAmazonImageUrl(hiRes[1]);
-    if (url) return url;
+  for (const match of text.matchAll(/"hiRes"\s*:\s*"(https:\/\/[^"]+)"/g)) {
+    push(match[1]);
+  }
+  for (const match of text.matchAll(/"large"\s*:\s*"(https:\/\/[^"]+)"/g)) {
+    push(match[1]);
+  }
+  for (const match of text.matchAll(
+    /data-old-hires=["'](https:\/\/m\.media-amazon\.com\/images\/I\/[^"']+)["']/gi,
+  )) {
+    push(match[1]);
   }
 
-  // 3. JavaScript image data — large
-  const large = html.match(/"large"\s*:\s*"(https:\/\/[^"]+)"/);
-  if (large?.[1]) {
-    const url = normalizeAmazonImageUrl(large[1]);
-    if (url) return url;
+  for (const match of text.matchAll(
+    /https:\/\/m\.media-amazon\.com\/images\/I\/[A-Za-z0-9+._%-]+\.(?:jpg|jpeg|png|webp)/gi,
+  )) {
+    const raw = match[0];
+    if (THUMBNAIL_MARKER.test(raw)) continue;
+    push(raw);
   }
 
-  // 4. colorImages or imageGalleryData blocks
-  const colorImages = html.match(
-    /"colorImages"[^}]*"large"\s*:\s*"(https:\/\/m\.media-amazon\.com\/images\/I\/[^"]+)"/,
-  );
-  if (colorImages?.[1]) {
-    const url = normalizeAmazonImageUrl(colorImages[1]);
-    if (url) return url;
-  }
-
-  // 5. data-old-hires attribute (common in product image tags)
-  const oldHires = html.match(
-    /data-old-hires=["'](https:\/\/m\.media-amazon\.com\/images\/I\/[^"']+)["']/i,
-  );
-  if (oldHires?.[1]) {
-    const url = normalizeAmazonImageUrl(oldHires[1]);
-    if (url) return url;
-  }
-
-  // 6. data-src or src on landingImage
-  const landingImage = html.match(
-    /id=["']landingImage["'][^>]+(?:data-old-hires|src)=["'](https:\/\/m\.media-amazon\.com\/images\/I\/[^"']+)["']/i,
-  );
-  if (landingImage?.[1]) {
-    const url = normalizeAmazonImageUrl(landingImage[1]);
-    if (url) return url;
-  }
-
-  // 7. Any m.media-amazon.com image URL — prefer larger ones
-  const allMedia = [
-    ...html.matchAll(
-      /https:\/\/m\.media-amazon\.com\/images\/I\/[A-Za-z0-9+._%-]+\.(?:jpg|jpeg|png|webp)/gi,
-    ),
-  ].map((m) => m[0]);
-
-  // Filter out small/thumbnail images (those with dimension markers like _SX38_ or _US40_)
-  const fullSize = allMedia.filter(
-    (u) => !/\._(?:SS|SX|SY|US|SR|CR|AC)\d{1,3}_/.test(u),
-  );
-  const candidate = fullSize[0] ?? allMedia[0];
-  if (candidate) {
-    const url = normalizeAmazonImageUrl(candidate);
-    if (url) return url;
-  }
-
-  return null;
+  return [...found];
 }
 
-/** CDN patterns to try as fallback when page scraping fails. */
-function legacyImageCandidates(asin: string): string[] {
-  return [
-    // Modern product image path
-    `https://m.media-amazon.com/images/P/${asin}.01._SL1500_.jpg`,
-    `https://m.media-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`,
-    // Legacy CDN
-    `https://images-na.ssl-images-amazon.com/images/P/${asin}.01._SL1500_.jpg`,
-    `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.L.jpg`,
-  ];
+/** GET the first bytes of a URL and confirm it is a real product photo (not a 1×1 GIF). */
+async function measureImageBytes(url: string): Promise<number | null> {
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      headers: {
+        "User-Agent": BROWSER_HEADERS["User-Agent"],
+        Range: "bytes=0-16383",
+      },
+      signal: AbortSignal.timeout(12_000),
+    });
+
+    if (!response.ok) return null;
+
+    const type = response.headers.get("content-type") ?? "";
+    if (!type.startsWith("image/")) return null;
+
+    const buf = await response.arrayBuffer();
+    const bytes = buf.byteLength;
+    if (bytes < MIN_IMAGE_BYTES) return null;
+
+    return bytes;
+  } catch {
+    return null;
+  }
 }
 
-async function bestReachableImageUrl(urls: string[]): Promise<string | null> {
-  let best: { url: string; length: number } | null = null;
+async function pickBestVerifiedImage(urls: string[]): Promise<string | null> {
+  let best: { url: string; bytes: number } | null = null;
 
   for (const url of urls) {
-    try {
-      const response = await fetch(url, {
-        method: "HEAD",
-        redirect: "follow",
-        signal: AbortSignal.timeout(8_000),
-      });
-      const type = response.headers.get("content-type") ?? "";
-      const length = Number(response.headers.get("content-length") ?? "0");
-      if (
-        !response.ok ||
-        !type.startsWith("image/") ||
-        (length > 0 && length <= 500)
-      ) {
-        continue;
-      }
-      const score = length > 0 ? length : 1;
-      if (!best || score > best.length) {
-        best = { url, length: score };
-      }
-    } catch {
-      continue;
+    const bytes = await measureImageBytes(url);
+    if (bytes === null) continue;
+    if (!best || bytes > best.bytes) {
+      best = { url, bytes };
     }
   }
 
@@ -203,9 +236,9 @@ async function bestReachableImageUrl(urls: string[]): Promise<string | null> {
 async function fetchAmazonPage(productUrl: string): Promise<string | null> {
   const urls = [
     productUrl,
-    // If the URL is .ca or .co.uk etc., also try .com
     productUrl.replace(/amazon\.[a-z.]+\/dp\//, "amazon.com/dp/"),
-  ].filter((u, i, arr) => arr.indexOf(u) === i); // deduplicate
+    productUrl.replace(/amazon\.[a-z.]+\/dp\//, "amazon.ca/dp/"),
+  ].filter((u, i, arr) => arr.indexOf(u) === i);
 
   for (const url of urls) {
     try {
@@ -219,11 +252,11 @@ async function fetchAmazonPage(productUrl: string): Promise<string | null> {
       if (!response.ok) continue;
 
       const html = await response.text();
-      // If Amazon returned a CAPTCHA/robot check page, skip it
       if (
         html.includes("Type the characters you see in this image") ||
         html.includes("Enter the characters you see below") ||
-        html.includes("api-services-support@amazon.com") && html.length < 5000
+        (html.includes("api-services-support@amazon.com") &&
+          html.length < 5000)
       ) {
         continue;
       }
@@ -237,8 +270,26 @@ async function fetchAmazonPage(productUrl: string): Promise<string | null> {
   return null;
 }
 
+/** Jina Reader proxy — works when the app server IP is blocked by Amazon. */
+async function fetchAmazonPageViaJina(productUrl: string): Promise<string | null> {
+  try {
+    const response = await fetch(
+      `https://r.jina.ai/${encodeURIComponent(productUrl)}`,
+      {
+        headers: { Accept: "text/plain" },
+        signal: AbortSignal.timeout(30_000),
+      },
+    );
+    if (!response.ok) return null;
+    return await response.text();
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Resolves a product hero image from an Amazon URL: page scrape first, then ASIN CDN fallbacks.
+ * Resolves a product hero image from an Amazon URL.
+ * Tries direct page scrape, then Jina proxy, then verifies candidates are real JPEGs.
  */
 export async function resolveAmazonProductImageUrl(
   amazonUrl: string,
@@ -251,12 +302,22 @@ export async function resolveAmazonProductImageUrl(
     ? expanded.split("?")[0]
     : `https://www.amazon.com/dp/${asin}`;
 
+  const candidates: string[] = [];
+
   const html = await fetchAmazonPage(productUrl);
   if (html) {
-    const fromPage = parseImageFromHtml(html);
-    if (fromPage) return fromPage;
+    candidates.push(...collectAmazonImageCandidates(html));
   }
 
-  // Fall back to known CDN URL patterns
-  return bestReachableImageUrl(legacyImageCandidates(asin));
+  if (candidates.length === 0) {
+    const jina = await fetchAmazonPageViaJina(productUrl);
+    if (jina) {
+      const fromJina = collectAmazonImageCandidates(jina);
+      candidates.push(...fromJina);
+    }
+  }
+
+  if (candidates.length === 0) return null;
+
+  return pickBestVerifiedImage(candidates);
 }

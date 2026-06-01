@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { posts } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
 import {
+  coerceProductImageUrl,
   expandAmazonProductUrl,
   resolveAmazonProductImageUrl,
 } from "@/lib/amazon-image";
@@ -32,14 +33,9 @@ function parseUrlLines(value: string | undefined): string[] {
   });
 }
 
-function normalizeImageUrl(value: string | undefined): string | null {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
-}
-
 async function preparePostValues(input: PostEditorInput) {
   const amazonUrl = await expandAmazonProductUrl(input.amazon_url);
-  let imageUrl = normalizeImageUrl(input.image_url);
+  let imageUrl = coerceProductImageUrl(input.image_url);
   if (!imageUrl) {
     imageUrl = await resolveAmazonProductImageUrl(amazonUrl);
   }
