@@ -6,6 +6,7 @@ import { ProsConsList } from "@/components/review/ProsConsList";
 import { AffiliateButton } from "@/components/review/AffiliateButton";
 import { Badge } from "@/components/ui/badge";
 import { RelatedPosts } from "@/components/review/RelatedPosts";
+import { CompareWithLinks } from "@/components/review/CompareWithLinks";
 import { PostBody } from "@/components/review/PostBody";
 import { formatDate, siteUrl } from "@/lib/utils";
 import { BreadcrumbNav } from "@/components/common/BreadcrumbNav";
@@ -147,6 +148,8 @@ export function ReviewDetail({
           />
         </div>
       </section>
+
+      <CompareWithLinks post={post} />
 
       <RelatedPosts
         categoryId={post.category_id}

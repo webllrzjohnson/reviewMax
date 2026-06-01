@@ -10,7 +10,18 @@ import {
 import { db } from "@/lib/db";
 import { mapCategory, mapPostWithCategory } from "@/lib/db/mappers";
 import { categories, posts } from "@/lib/db/schema";
-import type { Category, PostWithCategory } from "@/types";
+import type {
+  Category,
+  CategoryWithPostCount,
+  PostWithCategory,
+} from "@/types";
+
+export type ComparePostsResult =
+  | { ok: true; posts: [PostWithCategory, PostWithCategory] }
+  | {
+      ok: false;
+      reason: "not_found" | "same_slug" | "different_category";
+    };
 
 export async function getCategories(): Promise<Category[]> {
   try {
@@ -21,6 +32,34 @@ export async function getCategories(): Promise<Category[]> {
     return rows.map(mapCategory);
   } catch (error) {
     console.warn("getCategories", error);
+    return [];
+  }
+}
+
+/** Categories that have at least one published post, with counts. */
+export async function getCategoriesWithPublishedPosts(): Promise<
+  CategoryWithPostCount[]
+> {
+  try {
+    const rows = await db
+      .select({
+        category: categories,
+        postCount: count(posts.id),
+      })
+      .from(categories)
+      .innerJoin(
+        posts,
+        and(eq(posts.categoryId, categories.id), eq(posts.isPublished, true)),
+      )
+      .groupBy(categories.id)
+      .orderBy(categories.name);
+
+    return rows.map(({ category, postCount }) => ({
+      ...mapCategory(category),
+      post_count: Number(postCount),
+    }));
+  } catch (error) {
+    console.warn("getCategoriesWithPublishedPosts", error);
     return [];
   }
 }
@@ -112,6 +151,28 @@ export async function getPostsByCategorySlug(
     console.warn("getPostsByCategorySlug", error);
     return [];
   }
+}
+
+export async function getPostsForComparison(
+  slugA: string,
+  slugB: string,
+): Promise<ComparePostsResult> {
+  const [a, b] = await Promise.all([
+    getPostBySlug(slugA),
+    getPostBySlug(slugB),
+  ]);
+
+  if (!a || !b) {
+    return { ok: false, reason: "not_found" };
+  }
+  if (a.slug === b.slug) {
+    return { ok: false, reason: "same_slug" };
+  }
+  if (a.category_id !== b.category_id) {
+    return { ok: false, reason: "different_category" };
+  }
+
+  return { ok: true, posts: [a, b] };
 }
 
 export async function getRelatedPosts(

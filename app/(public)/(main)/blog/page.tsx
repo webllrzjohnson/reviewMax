@@ -1,16 +1,25 @@
 import type { Metadata } from "next";
 import { siteUrl } from "@/lib/utils";
 import { Suspense } from "react";
-import { getCategories, getPublishedPostsPage } from "@/lib/data";
-import { PostList } from "@/components/blog/PostList";
+import {
+  getCategories,
+  getCategoriesWithPublishedPosts,
+  getPublishedPostsPage,
+} from "@/lib/data";
+import { ComparePostGrid } from "@/components/review/ComparePostGrid";
 import { BlogExplorer } from "@/components/blog/BlogExplorer";
 import { BlogPagination } from "@/components/blog/BlogPagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatCategoryList } from "@/lib/category-colors";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const categories = await getCategoriesWithPublishedPosts();
+  const topics = formatCategoryList(categories.map((c) => c.name));
   const title = "Reviews & buying guides";
   const description =
-    "Search and filter product reviews across kitchen, tech, fitness, and home categories.";
+    categories.length > 0
+      ? `Search and filter product reviews across ${topics}. Honest pros, cons, and verdicts.`
+      : "Search and filter honest product reviews with pros, cons, and clear verdicts.";
   const url = `${siteUrl()}/blog`;
   return {
     title,
@@ -76,7 +85,11 @@ async function BlogPostsSection({
 
   return (
     <>
-      <PostList posts={posts} />
+      <ComparePostGrid
+        posts={posts}
+        emptyTitle="No reviews match your filters."
+        emptyBody="Try a different search or category."
+      />
       <BlogPagination page={page} pageSize={PAGE_SIZE} total={total} />
     </>
   );
@@ -86,15 +99,26 @@ export default async function BlogIndexPage(props: {
   searchParams: Promise<SearchParams>;
 }) {
   const searchParams = await props.searchParams;
-  const categories = await getCategories();
+  const [categories, activeCategories] = await Promise.all([
+    getCategories(),
+    getCategoriesWithPublishedPosts(),
+  ]);
+  const topics = formatCategoryList(activeCategories.map((c) => c.name));
 
   return (
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight">Reviews & blog</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          Honest breakdowns with pros, cons, ratings, and a clear verdict—then
-          buy on Amazon if it fits your needs.
+          Honest breakdowns with pros, cons, ratings, and a clear verdict
+          {activeCategories.length > 0 ? (
+            <>
+              {" "}
+              across{" "}
+              <span className="font-medium text-foreground">{topics}</span>
+            </>
+          ) : null}
+          . Select two products to compare side by side.
         </p>
       </header>
 

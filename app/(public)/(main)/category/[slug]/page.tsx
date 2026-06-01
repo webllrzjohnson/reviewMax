@@ -4,7 +4,7 @@ import {
   getCategoryBySlug,
   getPostsByCategorySlug,
 } from "@/lib/data";
-import { PostList } from "@/components/blog/PostList";
+import { ComparePostGrid } from "@/components/review/ComparePostGrid";
 import { siteUrl } from "@/lib/utils";
 
 export const revalidate = 3600;
@@ -50,7 +50,7 @@ export default async function CategoryPage({ params }: Props) {
           </p>
         ) : null}
       </header>
-      <PostList posts={posts} />
+      <ComparePostGrid posts={posts} />
     </div>
   );
 }

@@ -9,6 +9,18 @@ export function Footer() {
           aria-label="Footer"
         >
           <Link
+            href="/blog"
+            className="text-zinc-300 hover:text-white transition-colors"
+          >
+            Reviews
+          </Link>
+          <Link
+            href="/compare"
+            className="text-zinc-300 hover:text-white transition-colors"
+          >
+            Compare
+          </Link>
+          <Link
             href="/about"
             className="text-zinc-400 hover:text-white transition-colors"
           >

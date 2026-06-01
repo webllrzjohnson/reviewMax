@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GitCompare } from "lucide-react";
 import { getCategories, getPopularPosts } from "@/lib/data";
 import { Separator } from "@/components/ui/separator";
 import { categoryIconForSlug } from "@/lib/category-icons";
@@ -27,6 +28,19 @@ export async function Sidebar() {
             </li>
           ))}
         </ul>
+      </div>
+      <Separator />
+      <div>
+        <Link
+          href="/compare"
+          className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2.5 text-sm font-medium transition-colors hover:border-primary/30 hover:bg-primary/5"
+        >
+          <GitCompare className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+          Compare two products
+        </Link>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Pick two reviews in the same category for a side-by-side breakdown.
+        </p>
       </div>
       <Separator />
       <div>

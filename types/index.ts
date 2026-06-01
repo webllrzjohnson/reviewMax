@@ -14,6 +14,10 @@ export interface Category {
   created_at: string;
 }
 
+export interface CategoryWithPostCount extends Category {
+  post_count: number;
+}
+
 export interface Post {
   id: string;
   title: string;
