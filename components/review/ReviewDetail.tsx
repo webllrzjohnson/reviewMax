@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { PostWithCategory } from "@/types";
 import { ReviewCardImage } from "@/components/review/ReviewCardImage";
 import { StarRating } from "@/components/review/StarRating";
@@ -8,9 +9,6 @@ import { RelatedPosts } from "@/components/review/RelatedPosts";
 import { PostBody } from "@/components/review/PostBody";
 import { formatDate, siteUrl } from "@/lib/utils";
 import { BreadcrumbNav } from "@/components/common/BreadcrumbNav";
-
-const PLACEHOLDER =
-  "https://placehold.co/1200x630/e2e8f0/64748b?text=Product";
 
 /** Breaks out of main horizontal padding so the hero reads as full-width within the column. */
 function heroBleedClassName() {
