@@ -32,6 +32,11 @@ export function siteUrl(): string {
   );
 }
 
+/** Public contact address; override with NEXT_PUBLIC_CONTACT_EMAIL. */
+export function contactEmail(): string {
+  return process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || "hello@verdict.reviews";
+}
+
 export function slugifyTitle(title: string): string {
   return title
     .toLowerCase()

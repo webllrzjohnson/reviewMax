@@ -1,16 +1,14 @@
 import Link from "next/link";
 import { GitCompare } from "lucide-react";
 import type { PostWithCategory } from "@/types";
-import { getRelatedPosts } from "@/lib/data";
 
-export async function CompareWithLinks({
+export function CompareWithLinks({
   post,
-  limit = 8,
+  related,
 }: {
   post: PostWithCategory;
-  limit?: number;
+  related: PostWithCategory[];
 }) {
-  const related = await getRelatedPosts(post.category_id, post.slug, limit);
   if (related.length === 0) return null;
 
   return (

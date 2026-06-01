@@ -27,6 +27,12 @@ export function Footer() {
             About
           </Link>
           <Link
+            href="/contact"
+            className="text-zinc-400 hover:text-white transition-colors"
+          >
+            Contact
+          </Link>
+          <Link
             href="/affiliate-disclosure"
             className="text-zinc-400 hover:text-white transition-colors"
           >

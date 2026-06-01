@@ -1,16 +1,7 @@
-import { getRelatedPosts } from "@/lib/data";
+import type { PostWithCategory } from "@/types";
 import { ReviewCard } from "@/components/review/ReviewCard";
 
-export async function RelatedPosts({
-  categoryId,
-  excludeSlug,
-  limit = 3,
-}: {
-  categoryId: string;
-  excludeSlug: string;
-  limit?: number;
-}) {
-  const posts = await getRelatedPosts(categoryId, excludeSlug, limit);
+export function RelatedPosts({ posts }: { posts: PostWithCategory[] }) {
   if (posts.length === 0) return null;
 
   return (

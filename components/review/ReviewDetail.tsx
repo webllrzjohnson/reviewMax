@@ -9,6 +9,7 @@ import { RelatedPosts } from "@/components/review/RelatedPosts";
 import { CompareWithLinks } from "@/components/review/CompareWithLinks";
 import { PostBody } from "@/components/review/PostBody";
 import { formatDate, siteUrl } from "@/lib/utils";
+import { getRelatedPosts } from "@/lib/data";
 import { BreadcrumbNav } from "@/components/common/BreadcrumbNav";
 
 /** Breaks out of main horizontal padding so the hero reads as full-width within the column. */
@@ -16,11 +17,13 @@ function heroBleedClassName() {
   return "-mx-4 w-[calc(100%+2rem)] sm:-mx-6 sm:w-[calc(100%+3rem)]";
 }
 
-export function ReviewDetail({
+export async function ReviewDetail({
   post,
 }: {
   post: PostWithCategory;
 }) {
+  const related = await getRelatedPosts(post.category_id, post.slug, 8);
+
   return (
     <article className="space-y-8">
       <BreadcrumbNav
@@ -141,13 +144,9 @@ export function ReviewDetail({
         </div>
       </section>
 
-      <CompareWithLinks post={post} />
+      <CompareWithLinks post={post} related={related} />
 
-      <RelatedPosts
-        categoryId={post.category_id}
-        excludeSlug={post.slug}
-        limit={3}
-      />
+      <RelatedPosts posts={related.slice(0, 3)} />
 
       <JsonLd post={post} />
     </article>

@@ -2,28 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-
-const STORAGE_KEY = "reviewmax-cookie-consent";
+import {
+  getStoredConsent,
+  setStoredConsent,
+  type ConsentValue,
+} from "@/lib/analytics-consent";
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    try {
-      if (typeof window !== "undefined" && !localStorage.getItem(STORAGE_KEY)) {
-        setVisible(true);
-      }
-    } catch {
-      setVisible(true);
-    }
+    setVisible(getStoredConsent() === null);
   }, []);
 
-  function persistPreference(value: "accepted" | "declined") {
-    try {
-      localStorage.setItem(STORAGE_KEY, value);
-    } catch {
-      /* ignore private mode / quota */
-    }
+  function persistPreference(value: ConsentValue) {
+    setStoredConsent(value);
     setVisible(false);
   }
 

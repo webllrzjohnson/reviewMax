@@ -31,6 +31,11 @@ export const metadata: Metadata = {
   },
   description:
     "Honest product reviews and buying guides. Find kitchen gadgets, home tech, and fitness gear picks with clear pros, cons, star ratings, and verdicts.",
+  alternates: {
+    types: {
+      "application/rss+xml": [{ url: "/feed.xml", title: "Verdict — Product Reviews" }],
+    },
+  },
   openGraph: {
     type: "website",
     locale: "en_US",

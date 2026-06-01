@@ -1,3 +1,4 @@
+import { cache } from "react";
 import {
   and,
   count,
@@ -23,7 +24,7 @@ export type ComparePostsResult =
       reason: "not_found" | "same_slug" | "different_category";
     };
 
-export async function getCategories(): Promise<Category[]> {
+export const getCategories = cache(async (): Promise<Category[]> => {
   try {
     const rows = await db
       .select()
@@ -34,12 +35,12 @@ export async function getCategories(): Promise<Category[]> {
     console.warn("getCategories", error);
     return [];
   }
-}
+});
 
 /** Categories that have at least one published post, with counts. */
-export async function getCategoriesWithPublishedPosts(): Promise<
+export const getCategoriesWithPublishedPosts = cache(async (): Promise<
   CategoryWithPostCount[]
-> {
+> => {
   try {
     const rows = await db
       .select({
@@ -62,27 +63,27 @@ export async function getCategoriesWithPublishedPosts(): Promise<
     console.warn("getCategoriesWithPublishedPosts", error);
     return [];
   }
-}
+});
 
-export async function getCategoryBySlug(
-  slug: string,
-): Promise<Category | null> {
-  try {
-    const [row] = await db
-      .select()
-      .from(categories)
-      .where(eq(categories.slug, slug))
-      .limit(1);
-    return row ? mapCategory(row) : null;
-  } catch {
-    return null;
-  }
-}
+export const getCategoryBySlug = cache(
+  async (slug: string): Promise<Category | null> => {
+    try {
+      const [row] = await db
+        .select()
+        .from(categories)
+        .where(eq(categories.slug, slug))
+        .limit(1);
+      return row ? mapCategory(row) : null;
+    } catch {
+      return null;
+    }
+  },
+);
 
 /** Published posts with category, newest first. */
-export async function getPublishedPosts(
+export const getPublishedPosts = cache(async (
   limit = 50,
-): Promise<PostWithCategory[]> {
+): Promise<PostWithCategory[]> => {
   try {
     const rows = await db
       .select({
@@ -102,28 +103,28 @@ export async function getPublishedPosts(
     console.warn("getPublishedPosts", error);
     return [];
   }
-}
+});
 
-export async function getPostBySlug(
-  slug: string,
-): Promise<PostWithCategory | null> {
-  try {
-    const [row] = await db
-      .select({
-        post: posts,
-        category: categories,
-      })
-      .from(posts)
-      .innerJoin(categories, eq(posts.categoryId, categories.id))
-      .where(and(eq(posts.slug, slug), eq(posts.isPublished, true)))
-      .limit(1);
+export const getPostBySlug = cache(
+  async (slug: string): Promise<PostWithCategory | null> => {
+    try {
+      const [row] = await db
+        .select({
+          post: posts,
+          category: categories,
+        })
+        .from(posts)
+        .innerJoin(categories, eq(posts.categoryId, categories.id))
+        .where(and(eq(posts.slug, slug), eq(posts.isPublished, true)))
+        .limit(1);
 
-    if (!row) return null;
-    return mapPostWithCategory({ ...row.post, category: row.category });
-  } catch {
-    return null;
-  }
-}
+      if (!row) return null;
+      return mapPostWithCategory({ ...row.post, category: row.category });
+    } catch {
+      return null;
+    }
+  },
+);
 
 export async function getPostsByCategorySlug(
   categorySlug: string,
@@ -175,11 +176,11 @@ export async function getPostsForComparison(
   return { ok: true, posts: [a, b] };
 }
 
-export async function getRelatedPosts(
+export const getRelatedPosts = cache(async (
   categoryId: string,
   excludeSlug: string,
   limit = 3,
-): Promise<PostWithCategory[]> {
+): Promise<PostWithCategory[]> => {
   try {
     const rows = await db
       .select({
@@ -205,11 +206,11 @@ export async function getRelatedPosts(
     console.warn("getRelatedPosts", error);
     return [];
   }
-}
+});
 
-export async function getPopularPosts(
+export const getPopularPosts = cache(async (
   limit = 5,
-): Promise<PostWithCategory[]> {
+): Promise<PostWithCategory[]> => {
   try {
     const rows = await db
       .select({
@@ -232,7 +233,7 @@ export async function getPopularPosts(
     console.warn("getPopularPosts", error);
     return [];
   }
-}
+});
 
 export type PostsPageResult = {
   posts: PostWithCategory[];
