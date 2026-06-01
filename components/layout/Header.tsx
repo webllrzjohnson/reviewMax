@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GitCompare, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { auth } from "@/auth";
 import { getCategories } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -67,17 +67,6 @@ export async function Header({ className }: { className?: string }) {
           >
             <Link href="/blog" aria-label="Search reviews">
               <Search className="h-5 w-5" />
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden text-zinc-300 hover:bg-zinc-800 hover:text-white sm:inline-flex"
-          >
-            <Link href="/compare">
-              <GitCompare className="h-4 w-4" aria-hidden />
-              Compare
             </Link>
           </Button>
           <Button

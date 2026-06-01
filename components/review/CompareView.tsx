@@ -5,7 +5,7 @@ import { StarRating } from "@/components/review/StarRating";
 import { AffiliateButton } from "@/components/review/AffiliateButton";
 import { Badge } from "@/components/ui/badge";
 import { BreadcrumbNav } from "@/components/common/BreadcrumbNav";
-import { Check, X } from "lucide-react";
+import { Check, Trophy, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function CompareColumn({
@@ -46,15 +46,21 @@ function CompareColumn({
         <div
           className={cn(
             "mt-3 rounded-lg border p-3",
-            ratingWins && "border-emerald-300 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-950/30",
-            !ratingWins && !ratingTie && "border-muted",
-            ratingTie && "border-muted",
+            ratingWins
+              ? "border-emerald-300 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-950/30"
+              : ratingTie
+                ? "border-amber-200 bg-amber-50/60 dark:border-amber-800 dark:bg-amber-950/30"
+                : "border-muted",
           )}
         >
           <StarRating rating={post.rating} />
           {ratingWins ? (
             <p className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
               Higher rated
+            </p>
+          ) : ratingTie ? (
+            <p className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+              Tied rating
             </p>
           ) : null}
         </div>
@@ -107,6 +113,145 @@ function CompareColumn({
   );
 }
 
+function WinnerSummary({
+  left,
+  right,
+}: {
+  left: PostWithCategory;
+  right: PostWithCategory;
+}) {
+  const leftRating = Number(left.rating ?? 0);
+  const rightRating = Number(right.rating ?? 0);
+
+  const rows = [
+    {
+      label: "Rating",
+      leftVal: leftRating > 0 ? `${leftRating.toFixed(1)} / 5` : "—",
+      rightVal: rightRating > 0 ? `${rightRating.toFixed(1)} / 5` : "—",
+      leftWins: leftRating > rightRating,
+      rightWins: rightRating > leftRating,
+    },
+    {
+      label: "Pros",
+      leftVal: `${left.pros.length} listed`,
+      rightVal: `${right.pros.length} listed`,
+      leftWins: left.pros.length > right.pros.length,
+      rightWins: right.pros.length > left.pros.length,
+    },
+    {
+      label: "Cons",
+      leftVal: `${left.cons.length} listed`,
+      rightVal: `${right.cons.length} listed`,
+      leftWins: left.cons.length < right.cons.length,
+      rightWins: right.cons.length < left.cons.length,
+    },
+  ] as const;
+
+  const leftScore = rows.filter((r) => r.leftWins).length;
+  const rightScore = rows.filter((r) => r.rightWins).length;
+  const winner =
+    leftScore > rightScore ? left : rightScore > leftScore ? right : null;
+
+  return (
+    <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+      <div className="flex items-center gap-2 border-b px-5 py-3">
+        <Trophy className="h-4 w-4 text-amber-500" aria-hidden />
+        <h2 className="text-sm font-semibold uppercase tracking-wide">
+          Quick Summary
+        </h2>
+      </div>
+
+      <div className="divide-y">
+        {/* column headers */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 py-3 text-xs font-semibold text-muted-foreground">
+          <span className="truncate">{left.title}</span>
+          <span className="w-16 text-center" />
+          <span className="truncate text-right">{right.title}</span>
+        </div>
+
+        {rows.map((row) => {
+          const tie = !row.leftWins && !row.rightWins;
+          return (
+            <div
+              key={row.label}
+              className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 py-3 text-sm"
+            >
+              <span
+                className={cn(
+                  "truncate font-medium",
+                  row.leftWins
+                    ? "text-emerald-700 dark:text-emerald-300"
+                    : tie
+                      ? "text-muted-foreground"
+                      : "text-muted-foreground",
+                )}
+              >
+                {row.leftVal}
+                {row.leftWins && (
+                  <span className="ml-1.5 inline-block rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                    ▲
+                  </span>
+                )}
+              </span>
+              <span className="w-16 text-center text-xs font-medium text-muted-foreground">
+                {row.label}
+              </span>
+              <span
+                className={cn(
+                  "truncate text-right font-medium",
+                  row.rightWins
+                    ? "text-emerald-700 dark:text-emerald-300"
+                    : tie
+                      ? "text-muted-foreground"
+                      : "text-muted-foreground",
+                )}
+              >
+                {row.rightWins && (
+                  <span className="mr-1.5 inline-block rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                    ▲
+                  </span>
+                )}
+                {row.rightVal}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* conclusion */}
+      <div
+        className={cn(
+          "flex items-center gap-3 border-t px-5 py-4",
+          winner
+            ? "bg-emerald-50/60 dark:bg-emerald-950/20"
+            : "bg-amber-50/60 dark:bg-amber-950/20",
+        )}
+      >
+        {winner ? (
+          <>
+            <Trophy className="h-5 w-5 shrink-0 text-amber-500" aria-hidden />
+            <p className="text-sm font-medium">
+              <span className="font-semibold">{winner.title}</span> edges ahead
+              on {leftScore > rightScore ? leftScore : rightScore} out of{" "}
+              {rows.length} metrics.
+            </p>
+          </>
+        ) : (
+          <>
+            <span className="text-lg" aria-hidden>
+              🤝
+            </span>
+            <p className="text-sm font-medium">
+              These two products are evenly matched — it&apos;s a tie across all
+              metrics.
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function CompareView({
   left,
   right,
@@ -149,6 +294,8 @@ export function CompareView({
           </p>
         ) : null}
       </header>
+
+      <WinnerSummary left={left} right={right} />
 
       <div className="grid gap-8 lg:grid-cols-2">
         <CompareColumn post={left} otherRating={right.rating} />

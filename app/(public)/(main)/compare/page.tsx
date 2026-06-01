@@ -70,7 +70,7 @@ export default async function ComparePage(props: {
   if (!left?.trim() || !right?.trim()) {
     const [categories, posts] = await Promise.all([
       getCategoriesWithPublishedPosts(),
-      getPublishedPosts(100),
+      getPublishedPosts(500),
     ]);
     return <ComparePicker categories={categories} posts={posts} />;
   }

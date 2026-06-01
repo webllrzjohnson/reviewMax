@@ -79,20 +79,12 @@ export function ReviewDetail({
         className="rounded-xl border border-[#16A34A]/25 bg-[#16A34A]/5 p-5 dark:border-[#22C55E]/20 dark:bg-[#22C55E]/8"
         aria-labelledby="quick-verdict-heading"
       >
-        <div className="flex items-center gap-2">
-          <p
-            id="quick-verdict-heading"
-            className="text-sm font-semibold uppercase tracking-wide text-[#16A34A] dark:text-[#22C55E]"
-          >
-            Verdict
-          </p>
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#16A34A] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-            <svg className="h-2.5 w-2.5" viewBox="0 0 12 12" fill="none" aria-hidden>
-              <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Verified
-          </span>
-        </div>
+        <p
+          id="quick-verdict-heading"
+          className="text-sm font-semibold uppercase tracking-wide text-[#16A34A] dark:text-[#22C55E]"
+        >
+          Verdict
+        </p>
         <p className="mt-3 text-base font-medium leading-relaxed">
           {post.verdict}
         </p>
@@ -173,11 +165,15 @@ function JsonLd({ post }: { post: PostWithCategory }) {
     name: post.title,
     image: post.image_url ? [post.image_url] : [fallbackImage],
     description: post.excerpt,
-    offers: {
-      "@type": "Offer",
-      url: post.amazon_url,
-      availability: "https://schema.org/InStock",
-    },
+    ...(post.amazon_url
+      ? {
+          offers: {
+            "@type": "Offer",
+            url: post.amazon_url,
+            availability: "https://schema.org/InStock",
+          },
+        }
+      : {}),
   };
 
   const reviewLd = {

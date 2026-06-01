@@ -50,7 +50,11 @@ export function ComparePostGrid({
   return (
     <>
       <p className="text-sm text-muted-foreground">
-        Select two reviews to compare side by side.
+        Select two reviews to compare side by side.{" "}
+        <Link href="/compare" className="underline underline-offset-2 hover:text-foreground">
+          Browse all products
+        </Link>{" "}
+        to compare across the full catalog.
       </p>
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {posts.map((post) => {
