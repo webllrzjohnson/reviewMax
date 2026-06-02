@@ -1,5 +1,5 @@
 /**
- * ReviewMax — shared app types.
+ * Verdict — shared app types.
  */
 
 export type UserRole = "admin" | "user";

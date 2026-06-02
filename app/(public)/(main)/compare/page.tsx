@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   getCategoriesWithPublishedPosts,
   getPostsForComparison,
-  getPublishedPosts,
 } from "@/lib/data";
 import { CompareView } from "@/components/review/CompareView";
 import { ComparePicker } from "@/components/review/ComparePicker";
@@ -68,11 +67,8 @@ export default async function ComparePage(props: {
   const { left, right } = await props.searchParams;
 
   if (!left?.trim() || !right?.trim()) {
-    const [categories, posts] = await Promise.all([
-      getCategoriesWithPublishedPosts(),
-      getPublishedPosts(500),
-    ]);
-    return <ComparePicker categories={categories} posts={posts} />;
+    const categories = await getCategoriesWithPublishedPosts();
+    return <ComparePicker categories={categories} />;
   }
 
   const result = await getPostsForComparison(left.trim(), right.trim());

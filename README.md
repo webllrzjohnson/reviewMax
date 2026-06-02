@@ -1,4 +1,4 @@
-﻿# ReviewMax
+﻿# Verdict
 
 AI-assisted Amazon affiliate review site built with Next.js, PostgreSQL, Auth.js, and n8n.
 

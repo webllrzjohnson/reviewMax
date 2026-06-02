@@ -5,6 +5,8 @@ import { getCategories } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { HeaderNavMobile } from "@/components/layout/HeaderNavMobile";
+import { HeaderNavLinks } from "@/components/layout/HeaderNavLinks";
+import { HeaderCategoryNav } from "@/components/layout/HeaderCategoryNav";
 
 export async function Header({ className }: { className?: string }) {
   const [categories, session] = await Promise.all([getCategories(), auth()]);
@@ -35,27 +37,8 @@ export async function Header({ className }: { className?: string }) {
           className="hidden flex-[2] items-center justify-center gap-3 text-sm font-medium lg:gap-5 xl:gap-6 md:flex"
           aria-label="Main"
         >
-          <Link
-            href="/blog"
-            className="whitespace-nowrap text-zinc-300 transition-colors hover:text-white"
-          >
-            Reviews
-          </Link>
-          <Link
-            href="/compare"
-            className="whitespace-nowrap text-zinc-300 transition-colors hover:text-white"
-          >
-            Compare
-          </Link>
-          {navCategories.map((c) => (
-            <Link
-              key={c.id}
-              href={`/category/${c.slug}`}
-              className="hidden whitespace-nowrap text-zinc-400 transition-colors hover:text-white lg:inline"
-            >
-              {c.name}
-            </Link>
-          ))}
+          <HeaderNavLinks />
+          <HeaderCategoryNav categories={navCategories} />
         </nav>
 
         <div className="flex flex-1 items-center justify-end gap-1 sm:gap-2">

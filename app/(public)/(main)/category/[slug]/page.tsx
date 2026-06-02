@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  getCategoryBySlug,
-  getPostsByCategorySlug,
-} from "@/lib/data";
+import { getCategoryBySlug, getPublishedPostsPage } from "@/lib/data";
 import { ComparePostGrid } from "@/components/review/ComparePostGrid";
+import { CategoryPagination } from "@/components/category/CategoryPagination";
 import { siteUrl } from "@/lib/utils";
 
 export const revalidate = 3600;
 
-type Props = { params: Promise<{ slug: string }> };
+const PAGE_SIZE = 9;
+
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -28,12 +31,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function CategoryPage({ params }: Props) {
+export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const sp = await searchParams;
   const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const posts = await getPostsByCategorySlug(category.slug);
+  const page =
+    Number(Array.isArray(sp.page) ? sp.page[0] : sp.page) || 1;
+
+  const { posts, total } = await getPublishedPostsPage({
+    categorySlug: slug,
+    page,
+    pageSize: PAGE_SIZE,
+  });
 
   return (
     <div className="space-y-8">
@@ -51,6 +62,12 @@ export default async function CategoryPage({ params }: Props) {
         ) : null}
       </header>
       <ComparePostGrid posts={posts} />
+      <CategoryPagination
+        slug={slug}
+        page={page}
+        pageSize={PAGE_SIZE}
+        total={total}
+      />
     </div>
   );
 }

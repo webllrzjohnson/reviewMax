@@ -1,5 +1,5 @@
 {
-  "name": "reviewmax",
+  "name": "verdict",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -10,6 +10,7 @@
     "build": "NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start -H 0.0.0.0",
     "lint": "next lint",
+    "test": "node --import tsx --test tests/**/*.test.ts",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
     "db:create": "tsx --env-file=.env.local scripts/setup-local-db.ts",

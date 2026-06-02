@@ -6,23 +6,23 @@ import {
   eq,
   ilike,
   ne,
+  or,
   sql,
 } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { mapCategory, mapPostWithCategory } from "@/lib/db/mappers";
 import { categories, posts } from "@/lib/db/schema";
+import {
+  validateComparisonPair,
+  type ComparePostsResult,
+} from "@/lib/compare-validation";
 import type {
   Category,
   CategoryWithPostCount,
   PostWithCategory,
 } from "@/types";
 
-export type ComparePostsResult =
-  | { ok: true; posts: [PostWithCategory, PostWithCategory] }
-  | {
-      ok: false;
-      reason: "not_found" | "same_slug" | "different_category";
-    };
+export type { ComparePostsResult };
 
 export const getCategories = cache(async (): Promise<Category[]> => {
   try {
@@ -154,6 +154,31 @@ export async function getPostsByCategorySlug(
   }
 }
 
+export const getPostsByCategoryId = cache(
+  async (categoryId: string): Promise<PostWithCategory[]> => {
+    try {
+      const rows = await db
+        .select({
+          post: posts,
+          category: categories,
+        })
+        .from(posts)
+        .innerJoin(categories, eq(posts.categoryId, categories.id))
+        .where(
+          and(eq(posts.isPublished, true), eq(posts.categoryId, categoryId)),
+        )
+        .orderBy(desc(posts.publishedAt));
+
+      return rows.map(({ post, category: cat }) =>
+        mapPostWithCategory({ ...post, category: cat }),
+      );
+    } catch (error) {
+      console.warn("getPostsByCategoryId", error);
+      return [];
+    }
+  },
+);
+
 export async function getPostsForComparison(
   slugA: string,
   slugB: string,
@@ -163,17 +188,7 @@ export async function getPostsForComparison(
     getPostBySlug(slugB),
   ]);
 
-  if (!a || !b) {
-    return { ok: false, reason: "not_found" };
-  }
-  if (a.slug === b.slug) {
-    return { ok: false, reason: "same_slug" };
-  }
-  if (a.category_id !== b.category_id) {
-    return { ok: false, reason: "different_category" };
-  }
-
-  return { ok: true, posts: [a, b] };
+  return validateComparisonPair(a, b);
 }
 
 export const getRelatedPosts = cache(async (
@@ -255,7 +270,10 @@ export async function getPublishedPostsPage(params: {
   if (params.q?.trim()) {
     const safe = params.q.trim().replace(/[%_]/g, " ").slice(0, 80);
     if (safe.length > 0) {
-      filters.push(ilike(posts.title, `%${safe}%`));
+      const pattern = `%${safe}%`;
+      filters.push(
+        or(ilike(posts.title, pattern), ilike(posts.excerpt, pattern))!,
+      );
     }
   }
 

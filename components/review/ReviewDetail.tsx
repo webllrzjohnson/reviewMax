@@ -103,14 +103,14 @@ export async function ReviewDetail({
             More photos
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            {post.gallery_urls.map((url) => (
+            {post.gallery_urls.map((url, index) => (
               <div
                 key={url}
                 className="relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted"
               >
                 <Image
                   src={url}
-                  alt=""
+                  alt={`${post.title} — photo ${index + 1}`}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"

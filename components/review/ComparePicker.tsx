@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GitCompare } from "lucide-react";
-import type { CategoryWithPostCount, PostWithCategory } from "@/types";
+import type { CategoryWithPostCount } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -13,25 +13,61 @@ const selectClassName = cn(
   "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 );
 
+type ComparePostOption = {
+  id: string;
+  slug: string;
+  title: string;
+};
+
 export function ComparePicker({
   categories,
-  posts,
 }: {
   categories: CategoryWithPostCount[];
-  posts: PostWithCategory[];
 }) {
   const router = useRouter();
   const [categoryId, setCategoryId] = useState("");
   const [leftSlug, setLeftSlug] = useState("");
   const [rightSlug, setRightSlug] = useState("");
+  const [categoryPosts, setCategoryPosts] = useState<ComparePostOption[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const categoryPosts = useMemo(
-    () =>
-      categoryId
-        ? posts.filter((p) => p.category_id === categoryId)
-        : [],
-    [categoryId, posts],
-  );
+  useEffect(() => {
+    if (!categoryId) {
+      setCategoryPosts([]);
+      setLoadError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setLoadingPosts(true);
+    setLoadError(null);
+
+    fetch(`/api/compare/posts?categoryId=${encodeURIComponent(categoryId)}`, {
+      signal: controller.signal,
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error("Failed to load reviews");
+        }
+        return res.json() as Promise<ComparePostOption[]>;
+      })
+      .then((posts) => {
+        setCategoryPosts(posts);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setCategoryPosts([]);
+        setLoadError("Could not load reviews for this category. Try again.");
+      })
+      .finally(() => {
+        setLoadingPosts(false);
+      });
+
+    return () => controller.abort();
+  }, [categoryId]);
 
   function onCategoryChange(id: string) {
     setCategoryId(id);
@@ -54,7 +90,7 @@ export function ComparePicker({
     );
   }
 
-  if (categories.length === 0 || posts.length === 0) {
+  if (categories.length === 0) {
     return (
       <div className="mx-auto max-w-lg space-y-4 rounded-2xl border bg-card p-8 text-center">
         <h1 className="font-heading text-2xl font-bold">Compare products</h1>
@@ -94,16 +130,24 @@ export function ComparePicker({
           </select>
         </div>
 
+        {loadError ? (
+          <p className="text-sm text-destructive" role="alert">
+            {loadError}
+          </p>
+        ) : null}
+
         <div className="space-y-2">
           <Label htmlFor="compare-left">First product</Label>
           <select
             id="compare-left"
             value={leftSlug}
             onChange={(e) => setLeftSlug(e.target.value)}
-            disabled={!categoryId}
+            disabled={!categoryId || loadingPosts}
             className={selectClassName}
           >
-            <option value="">Select a review…</option>
+            <option value="">
+              {loadingPosts ? "Loading reviews…" : "Select a review…"}
+            </option>
             {categoryPosts.map((p) => (
               <option key={p.id} value={p.slug} disabled={p.slug === rightSlug}>
                 {p.title}
@@ -118,10 +162,12 @@ export function ComparePicker({
             id="compare-right"
             value={rightSlug}
             onChange={(e) => setRightSlug(e.target.value)}
-            disabled={!categoryId}
+            disabled={!categoryId || loadingPosts}
             className={selectClassName}
           >
-            <option value="">Select a review…</option>
+            <option value="">
+              {loadingPosts ? "Loading reviews…" : "Select a review…"}
+            </option>
             {categoryPosts.map((p) => (
               <option key={p.id} value={p.slug} disabled={p.slug === leftSlug}>
                 {p.title}
@@ -134,7 +180,7 @@ export function ComparePicker({
       <Button
         type="button"
         className="w-full sm:w-auto"
-        disabled={!canCompare()}
+        disabled={!canCompare() || loadingPosts}
         onClick={handleCompare}
       >
         <GitCompare className="h-4 w-4" aria-hidden />

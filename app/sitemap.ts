@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { categories, posts } from "@/lib/db/schema";
 import { siteUrl } from "@/lib/utils";
@@ -41,7 +41,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           slug: categories.slug,
           createdAt: categories.createdAt,
         })
-        .from(categories),
+        .from(categories)
+        .innerJoin(
+          posts,
+          and(
+            eq(posts.categoryId, categories.id),
+            eq(posts.isPublished, true),
+          ),
+        )
+        .groupBy(categories.id, categories.slug, categories.createdAt),
     ]);
 
     const postRoutes =

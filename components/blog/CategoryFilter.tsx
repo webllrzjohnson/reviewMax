@@ -28,6 +28,7 @@ export function CategoryFilter({ categories }: { categories: Category[] }) {
             ? "border-primary bg-primary text-primary-foreground"
             : "border-transparent bg-muted hover:bg-muted/80",
         )}
+        aria-current={!active ? "page" : undefined}
       >
         All
       </Link>
@@ -41,6 +42,7 @@ export function CategoryFilter({ categories }: { categories: Category[] }) {
               ? "border-primary bg-primary text-primary-foreground"
               : "border-transparent bg-muted hover:bg-muted/80",
           )}
+          aria-current={active === c.slug ? "page" : undefined}
         >
           {c.name}
         </Link>

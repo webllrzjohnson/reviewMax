@@ -1,6 +1,8 @@
 export type ConsentValue = "accepted" | "declined";
 
-export const CONSENT_STORAGE_KEY = "reviewmax-cookie-consent";
+export const CONSENT_STORAGE_KEY = "verdict-cookie-consent";
+
+const LEGACY_CONSENT_STORAGE_KEY = "reviewmax-cookie-consent";
 
 /** Fired on the window whenever the user's analytics consent changes. */
 export const CONSENT_CHANGE_EVENT = "analytics-consent-change";
@@ -8,7 +10,9 @@ export const CONSENT_CHANGE_EVENT = "analytics-consent-change";
 export function getStoredConsent(): ConsentValue | null {
   if (typeof window === "undefined") return null;
   try {
-    const value = window.localStorage.getItem(CONSENT_STORAGE_KEY);
+    const value =
+      window.localStorage.getItem(CONSENT_STORAGE_KEY) ??
+      window.localStorage.getItem(LEGACY_CONSENT_STORAGE_KEY);
     return value === "accepted" || value === "declined" ? value : null;
   } catch {
     return null;
