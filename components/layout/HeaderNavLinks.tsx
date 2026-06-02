@@ -36,6 +36,19 @@ export function HeaderNavLinks() {
       >
         Compare
       </Link>
+      <Link
+        href="/best"
+        className={navLinkClass(
+          pathname === "/best" || pathname.startsWith("/best/"),
+        )}
+        aria-current={
+          pathname === "/best" || pathname.startsWith("/best/")
+            ? "page"
+            : undefined
+        }
+      >
+        Best picks
+      </Link>
     </>
   );
 }

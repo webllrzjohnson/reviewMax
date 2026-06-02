@@ -44,6 +44,19 @@ export async function Sidebar() {
       </div>
       <Separator />
       <div>
+        <Link
+          href="/best"
+          className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2.5 text-sm font-medium transition-colors hover:border-primary/30 hover:bg-primary/5"
+        >
+          <span aria-hidden>🏆</span>
+          Best-of guides
+        </Link>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Top-rated products ranked in each category.
+        </p>
+      </div>
+      <Separator />
+      <div>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Categories
         </h2>

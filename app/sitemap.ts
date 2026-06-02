@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { categories, posts } from "@/lib/db/schema";
 import { siteUrl } from "@/lib/utils";
@@ -10,6 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: base, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
     { url: `${base}/blog`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/best`, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/compare`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/about`, changeFrequency: "yearly", priority: 0.4 },
     { url: `${base}/contact`, changeFrequency: "yearly", priority: 0.4 },
@@ -40,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .select({
           slug: categories.slug,
           createdAt: categories.createdAt,
+          postCount: count(posts.id),
         })
         .from(categories)
         .innerJoin(
@@ -68,7 +70,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.65,
       })) ?? [];
 
-    return [...staticRoutes, ...categoryRoutes, ...postRoutes];
+    const roundupRoutes = categoryRows
+      .filter((category) => Number(category.postCount) >= 2)
+      .map((category) => ({
+        url: `${base}/best/${category.slug}`,
+        lastModified: new Date(category.createdAt ?? Date.now()),
+        changeFrequency: "weekly" as const,
+        priority: 0.82,
+      }));
+
+    return [...staticRoutes, ...categoryRoutes, ...roundupRoutes, ...postRoutes];
   } catch (error) {
     console.warn("sitemap database read failed", error);
     return staticRoutes;

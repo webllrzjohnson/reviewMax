@@ -21,6 +21,12 @@ export function Footer() {
             Compare
           </Link>
           <Link
+            href="/best"
+            className="text-zinc-300 hover:text-white transition-colors"
+          >
+            Best picks
+          </Link>
+          <Link
             href="/about"
             className="text-zinc-400 hover:text-white transition-colors"
           >

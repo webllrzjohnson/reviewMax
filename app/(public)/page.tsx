@@ -181,13 +181,23 @@ export default async function HomePage() {
 
         {activeCategories.length > 0 && (
           <section className="space-y-6">
-            <div>
-              <h2 className="font-heading text-2xl font-bold tracking-tight">
-                Shop by category
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Browse every topic we cover — pick two products to compare
-              </p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="font-heading text-2xl font-bold tracking-tight">
+                  Shop by category
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Browse every topic we cover — pick two products to compare
+                </p>
+              </div>
+              {activeCategories.some((c) => c.post_count >= 2) ? (
+                <Link
+                  href="/best"
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  View best-of guides
+                </Link>
+              ) : null}
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {activeCategories.map((c) => {

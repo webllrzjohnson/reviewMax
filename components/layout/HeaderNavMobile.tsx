@@ -44,6 +44,12 @@ export function HeaderNavMobile({ categories }: { categories: Category[] }) {
             <GitCompare className="h-4 w-4" aria-hidden />
             Compare products
           </Link>
+          <Link
+            href="/best"
+            className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent"
+          >
+            Best picks
+          </Link>
           {categories.map((c) => (
             <Link
               key={c.id}

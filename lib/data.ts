@@ -250,6 +250,42 @@ export const getPopularPosts = cache(async (
   }
 });
 
+/** Top-rated published posts in a category, for best-of roundups. */
+export const getTopRatedPostsByCategorySlug = cache(
+  async (categorySlug: string, limit = 10): Promise<PostWithCategory[]> => {
+    const category = await getCategoryBySlug(categorySlug);
+    if (!category) return [];
+
+    try {
+      const rows = await db
+        .select({
+          post: posts,
+          category: categories,
+        })
+        .from(posts)
+        .innerJoin(categories, eq(posts.categoryId, categories.id))
+        .where(
+          and(
+            eq(posts.isPublished, true),
+            eq(posts.categoryId, category.id),
+          ),
+        )
+        .orderBy(
+          sql`${posts.rating} desc nulls last`,
+          desc(posts.publishedAt),
+        )
+        .limit(limit);
+
+      return rows.map(({ post, category: cat }) =>
+        mapPostWithCategory({ ...post, category: cat }),
+      );
+    } catch (error) {
+      console.warn("getTopRatedPostsByCategorySlug", error);
+      return [];
+    }
+  },
+);
+
 export type PostsPageResult = {
   posts: PostWithCategory[];
   total: number;
