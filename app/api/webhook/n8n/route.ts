@@ -47,8 +47,6 @@ export async function POST(request: NextRequest) {
       imageUrl = await resolveAmazonProductImageUrl(amazonUrl);
     }
 
-    const publishedAt = new Date().toISOString();
-
     try {
       const [inserted] = await db
         .insert(posts)
@@ -65,19 +63,29 @@ export async function POST(request: NextRequest) {
           amazonUrl,
           imageUrl,
           galleryUrls: payload.gallery_urls ?? [],
-          isPublished: true,
-          publishedAt,
+          isPublished: false,
+          publishedAt: null,
         })
-        .returning({ id: posts.id });
+        .returning({ id: posts.id, slug: posts.slug });
 
       if (!inserted) {
         return json({ success: false, error: "Database error" }, 500);
       }
 
-      revalidatePath("/");
-      revalidatePath("/blog");
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/posts");
 
-      return json({ success: true, id: inserted.id }, 200);
+      return json(
+        {
+          success: true,
+          id: inserted.id,
+          slug: inserted.slug,
+          published: false,
+          message:
+            "Draft saved. Review and publish from the admin dashboard.",
+        },
+        200,
+      );
     } catch (error) {
       const code =
         typeof error === "object" &&

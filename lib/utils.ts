@@ -53,3 +53,14 @@ export function formatDate(iso: string | null | undefined): string {
     day: "numeric",
   }).format(new Date(iso));
 }
+
+/** True when updated_at is meaningfully later than published_at. */
+export function wasUpdatedAfterPublish(
+  publishedAt: string | null | undefined,
+  updatedAt: string | null | undefined,
+): boolean {
+  if (!publishedAt || !updatedAt) return false;
+  const published = new Date(publishedAt).getTime();
+  const updated = new Date(updatedAt).getTime();
+  return updated - published > 60_000;
+}

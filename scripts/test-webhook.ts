@@ -41,7 +41,10 @@ async function main() {
   const body = await response.text();
   console.log("Status:", response.status);
   console.log("Response:", body);
-  console.log("View post:", `${baseUrl.replace(/\/$/, "")}/blog/${slug}`);
+  console.log(
+    "Draft should appear in admin:",
+    `${baseUrl.replace(/\/$/, "")}/dashboard/posts`,
+  );
 
   if (!response.ok) {
     process.exit(1);

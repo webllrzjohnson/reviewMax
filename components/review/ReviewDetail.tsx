@@ -4,11 +4,12 @@ import { ReviewCardImage } from "@/components/review/ReviewCardImage";
 import { StarRating } from "@/components/review/StarRating";
 import { ProsConsList } from "@/components/review/ProsConsList";
 import { AffiliateButton } from "@/components/review/AffiliateButton";
+import { StickyBuyBar } from "@/components/review/StickyBuyBar";
 import { Badge } from "@/components/ui/badge";
 import { RelatedPosts } from "@/components/review/RelatedPosts";
 import { CompareWithLinks } from "@/components/review/CompareWithLinks";
 import { PostBody } from "@/components/review/PostBody";
-import { formatDate, siteUrl } from "@/lib/utils";
+import { formatDate, siteUrl, wasUpdatedAfterPublish, cn } from "@/lib/utils";
 import { getRelatedPosts } from "@/lib/data";
 import { BreadcrumbNav } from "@/components/common/BreadcrumbNav";
 
@@ -23,9 +24,10 @@ export async function ReviewDetail({
   post: PostWithCategory;
 }) {
   const related = await getRelatedPosts(post.category_id, post.slug, 8);
+  const showUpdated = wasUpdatedAfterPublish(post.published_at, post.updated_at);
 
   return (
-    <article className="space-y-8">
+    <article className={cn("space-y-8", post.amazon_url ? "pb-24 sm:pb-28" : undefined)}>
       <BreadcrumbNav
         items={[
           { label: "Home", href: "/" },
@@ -66,6 +68,11 @@ export async function ReviewDetail({
               Published {formatDate(post.published_at)}
             </time>
           ) : null}
+          {showUpdated ? (
+            <time dateTime={post.updated_at!}>
+              Updated {formatDate(post.updated_at)}
+            </time>
+          ) : null}
           {post.amazon_url ? (
             <span>
               Contains{" "}
@@ -79,6 +86,7 @@ export async function ReviewDetail({
       </header>
 
       <aside
+        id="review-verdict"
         className="rounded-xl border border-[#16A34A]/25 bg-[#16A34A]/5 p-5 dark:border-[#22C55E]/20 dark:bg-[#22C55E]/8"
         aria-labelledby="quick-verdict-heading"
       >
@@ -91,6 +99,16 @@ export async function ReviewDetail({
         <p className="mt-3 text-base font-medium leading-relaxed">
           {post.verdict}
         </p>
+        {post.amazon_url ? (
+          <div className="mt-4">
+            <AffiliateButton
+              href_raw={post.amazon_url}
+              postSlug={post.slug}
+              label="Check price on Amazon"
+              className="w-full sm:w-auto"
+            />
+          </div>
+        ) : null}
       </aside>
 
       <ProsConsList pros={post.pros} cons={post.cons} />
@@ -149,6 +167,15 @@ export async function ReviewDetail({
       <RelatedPosts posts={related.slice(0, 3)} />
 
       <JsonLd post={post} />
+
+      {post.amazon_url ? (
+        <StickyBuyBar
+          postSlug={post.slug}
+          amazonUrl={post.amazon_url}
+          title={post.title}
+          observeTargetId="review-verdict"
+        />
+      ) : null}
     </article>
   );
 }
@@ -194,6 +221,7 @@ function JsonLd({ post }: { post: PostWithCategory }) {
     headline: post.title,
     description: post.excerpt,
     datePublished: post.published_at ?? undefined,
+    dateModified: post.updated_at ?? post.published_at ?? undefined,
     image: post.image_url ? [post.image_url] : [fallbackImage],
     author: { "@type": "Organization", name: "Verdict" },
     mainEntityOfPage: url,
