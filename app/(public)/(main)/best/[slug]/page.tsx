@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Trophy } from "lucide-react";
 import {
-  getCategoriesWithPublishedPosts,
   getCategoryBySlug,
   getTopRatedPostsByCategorySlug,
 } from "@/lib/data";
