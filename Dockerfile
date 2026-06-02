@@ -1,4 +1,8 @@
 # Multi-stage build for Next.js standalone (smaller image than Nixpacks default).
+#
+# Coolify: use Build Pack "Dockerfile". Do NOT override the start command —
+# the default CMD is `node server.js`. Set "Ports Exposes" to 3000.
+# Health check path: /api/health
 FROM node:20-alpine AS base
 
 FROM base AS deps
@@ -18,6 +22,7 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN apk add --no-cache libc6-compat
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
