@@ -12,6 +12,7 @@ import { PostBody } from "@/components/review/PostBody";
 import { formatDate, siteUrl, wasUpdatedAfterPublish, cn } from "@/lib/utils";
 import { getRelatedPosts } from "@/lib/data";
 import { BreadcrumbNav } from "@/components/common/BreadcrumbNav";
+import { ShareBar } from "@/components/common/ShareBar";
 
 /** Breaks out of main horizontal padding so the hero reads as full-width within the column. */
 function heroBleedClassName() {
@@ -110,6 +111,12 @@ export async function ReviewDetail({
           </div>
         ) : null}
       </aside>
+
+      <ShareBar
+        url={`${siteUrl()}/blog/${post.slug}`}
+        title={`${post.title} — Verdict`}
+        className="border-t pt-6"
+      />
 
       <ProsConsList pros={post.pros} cons={post.cons} />
 

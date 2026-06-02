@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { auth } from "@/auth";
-import { getCategories } from "@/lib/data";
+import { getCategoriesWithPublishedPosts } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { HeaderNavMobile } from "@/components/layout/HeaderNavMobile";
@@ -9,7 +9,10 @@ import { HeaderNavLinks } from "@/components/layout/HeaderNavLinks";
 import { HeaderCategoryNav } from "@/components/layout/HeaderCategoryNav";
 
 export async function Header({ className }: { className?: string }) {
-  const [categories, session] = await Promise.all([getCategories(), auth()]);
+  const [categories, session] = await Promise.all([
+    getCategoriesWithPublishedPosts(),
+    auth(),
+  ]);
   const navCategories = categories.slice(0, 4);
   const adminHref =
     session?.user?.role === "admin" ? "/dashboard" : "/login";

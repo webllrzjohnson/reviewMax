@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { GitCompare } from "lucide-react";
-import { getCategories, getPopularPosts } from "@/lib/data";
+import { getCategoriesWithPublishedPosts, getPopularPosts } from "@/lib/data";
 import { Separator } from "@/components/ui/separator";
 import { categoryIconForSlug } from "@/lib/category-icons";
 
 export async function Sidebar() {
   const [categories, popular] = await Promise.all([
-    getCategories(),
+    getCategoriesWithPublishedPosts(),
     getPopularPosts(5),
   ]);
 

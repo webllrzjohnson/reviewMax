@@ -5,8 +5,9 @@ import { StarRating } from "@/components/review/StarRating";
 import { AffiliateButton } from "@/components/review/AffiliateButton";
 import { Badge } from "@/components/ui/badge";
 import { BreadcrumbNav } from "@/components/common/BreadcrumbNav";
+import { ShareBar } from "@/components/common/ShareBar";
 import { Check, Trophy, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, siteUrl } from "@/lib/utils";
 
 function CompareColumn({
   post,
@@ -296,6 +297,11 @@ export function CompareView({
       </header>
 
       <WinnerSummary left={left} right={right} />
+
+      <ShareBar
+        url={`${siteUrl()}/compare?left=${encodeURIComponent(left.slug)}&right=${encodeURIComponent(right.slug)}`}
+        title={`${left.title} vs ${right.title} — Verdict`}
+      />
 
       <div className="grid gap-8 lg:grid-cols-2">
         <CompareColumn post={left} otherRating={right.rating} />
