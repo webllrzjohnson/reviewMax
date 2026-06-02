@@ -6,7 +6,7 @@ const nextConfig = {
   output: "standalone",
   outputFileTracingExcludes: {
     "*": [
-      "node_modules/@swc/**",
+      // Do NOT exclude @swc — Next.js server requires @swc/helpers at runtime.
       "node_modules/@esbuild/**",
       "node_modules/esbuild/**",
       "node_modules/webpack/**",
