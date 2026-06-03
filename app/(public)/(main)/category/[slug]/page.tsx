@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { siteUrl } from "@/lib/utils";
 import { getCategoryGuideContent } from "@/lib/category-guides";
+import { CategoryHeroBanner } from "@/components/category/CategoryHeroBanner";
 
 export const revalidate = 3600;
 
@@ -77,12 +78,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   return (
     <div className="space-y-10">
       <header className="space-y-4">
-        <p className="text-sm font-medium uppercase text-muted-foreground">
-          Category
-        </p>
-        <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-          {category.name} reviews & buying guide
-        </h1>
+        <CategoryHeroBanner category={category} postCount={total} />
         {hasRoundup ? (
           <Button variant="outline" size="sm" asChild>
             <Link href={`/best/${category.slug}`}>

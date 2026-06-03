@@ -3,6 +3,7 @@ import { GitCompare, Lightbulb } from "lucide-react";
 import { getCategoriesWithPublishedPosts, getPopularPosts } from "@/lib/data";
 import { Separator } from "@/components/ui/separator";
 import { categoryIconForSlug } from "@/lib/category-icons";
+import { RecentlyCompared } from "@/components/common/RecentlyCompared";
 
 export async function Sidebar() {
   const [categories, popular] = await Promise.all([
@@ -68,6 +69,8 @@ export async function Sidebar() {
           Have a product you want us to cover? Let us know.
         </p>
       </div>
+      <Separator />
+      <RecentlyCompared />
       <Separator />
       <div>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">

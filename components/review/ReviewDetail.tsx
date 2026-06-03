@@ -1,7 +1,6 @@
-import Image from "next/image";
 import type { PostWithCategory } from "@/types";
 import { ReviewCardImage } from "@/components/review/ReviewCardImage";
-import { StarRating } from "@/components/review/StarRating";
+import { AnimatedRating } from "@/components/review/AnimatedRating";
 import { ProsConsList } from "@/components/review/ProsConsList";
 import { AffiliateButton } from "@/components/review/AffiliateButton";
 import { StickyBuyBar } from "@/components/review/StickyBuyBar";
@@ -10,6 +9,7 @@ import { RelatedPosts } from "@/components/review/RelatedPosts";
 import { CompareWithLinks } from "@/components/review/CompareWithLinks";
 import { PostBody } from "@/components/review/PostBody";
 import { formatDate, siteUrl, wasUpdatedAfterPublish, cn } from "@/lib/utils";
+import { categoryAccentForSlug } from "@/lib/category-colors";
 import { getRelatedPosts } from "@/lib/data";
 import { BreadcrumbNav } from "@/components/common/BreadcrumbNav";
 import { ShareBar } from "@/components/common/ShareBar";
@@ -18,6 +18,7 @@ import { extractHeadings } from "@/lib/extract-headings";
 import { PostBadgeTag } from "@/components/review/PostBadge";
 import { HelpfulFeedback } from "@/components/review/HelpfulFeedback";
 import { FaqAccordion } from "@/components/review/FaqAccordion";
+import { GalleryLightbox } from "@/components/review/GalleryLightbox";
 
 /** Breaks out of main horizontal padding so the hero reads as full-width within the column. */
 function heroBleedClassName() {
@@ -32,6 +33,7 @@ export async function ReviewDetail({
   const related = await getRelatedPosts(post.category_id, post.slug, 8);
   const showUpdated = wasUpdatedAfterPublish(post.published_at, post.updated_at);
   const headings = extractHeadings(post.body);
+  const accent = categoryAccentForSlug(post.category?.slug ?? "");
 
   return (
     <article className={cn("space-y-8", post.amazon_url ? "pb-24 sm:pb-28" : undefined)}>
@@ -64,7 +66,9 @@ export async function ReviewDetail({
 
       <header className="space-y-4">
         {post.category ? (
-          <Badge variant="secondary">{post.category.name}</Badge>
+          <Badge className={cn("border shadow-sm", accent.badge)}>
+            {post.category.name}
+          </Badge>
         ) : null}
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
@@ -92,7 +96,7 @@ export async function ReviewDetail({
             </span>
           ) : null}
         </div>
-        <StarRating rating={post.rating} className="pt-2" />
+        <AnimatedRating rating={post.rating} className="pt-2" />
       </header>
 
       <aside
@@ -110,13 +114,21 @@ export async function ReviewDetail({
           {post.verdict}
         </p>
         {post.amazon_url ? (
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <AffiliateButton
               href_raw={post.amazon_url}
               postSlug={post.slug}
               label="Check price on Amazon"
               className="w-full sm:w-auto"
             />
+            {post.price_at_review ? (
+              <p className="text-xs text-muted-foreground">
+                Price at review:{" "}
+                <span className="font-semibold text-foreground">
+                  {post.price_at_review}
+                </span>
+              </p>
+            ) : null}
           </div>
         ) : null}
       </aside>
@@ -135,29 +147,7 @@ export async function ReviewDetail({
 
       <FaqAccordion faqs={post.faqs} />
 
-      {post.gallery_urls && post.gallery_urls.length > 0 ? (
-        <section className="space-y-4" aria-labelledby="gallery-heading">
-          <h2 id="gallery-heading" className="text-xl font-bold">
-            More photos
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {post.gallery_urls.map((url, index) => (
-              <div
-                key={url}
-                className="relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted"
-              >
-                <Image
-                  src={url}
-                  alt={`${post.title} — photo ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <GalleryLightbox images={post.gallery_urls ?? []} title={post.title} />
 
       <section
         className="rounded-xl border-2 border-[#FF9900]/35 bg-gradient-to-br from-[#FF9900]/18 via-background to-background p-6 shadow-md dark:from-[#FF9900]/10"

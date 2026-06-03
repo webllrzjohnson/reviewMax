@@ -36,6 +36,11 @@ export function mapPost(row: PostRow): Post {
     gallery_urls: row.galleryUrls ?? [],
     badge: (row.badge as PostBadge | null) ?? null,
     faqs: Array.isArray(row.faqs) ? (row.faqs as PostFaq[]) : [],
+    price_at_review: row.priceAtReview ?? null,
+    specs:
+      row.specs && typeof row.specs === "object" && !Array.isArray(row.specs)
+        ? (row.specs as Record<string, string>)
+        : {},
     is_published: row.isPublished,
     published_at: row.publishedAt,
     created_at: row.createdAt,

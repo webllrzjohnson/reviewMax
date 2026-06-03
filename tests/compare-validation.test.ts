@@ -20,6 +20,8 @@ function mockPost(overrides: Partial<PostWithCategory> = {}): PostWithCategory {
     gallery_urls: [],
     badge: null,
     faqs: [],
+    price_at_review: null,
+    specs: {},
     is_published: true,
     published_at: "2026-01-01T00:00:00.000Z",
     created_at: "2026-01-01T00:00:00.000Z",

@@ -54,6 +54,8 @@ export const posts = pgTable("posts", {
     .default(sql`'{}'::text[]`),
   badge: text("badge"),
   faqs: jsonb("faqs").notNull().default(sql`'[]'::jsonb`),
+  priceAtReview: text("price_at_review"),
+  specs: jsonb("specs").notNull().default(sql`'{}'::jsonb`),
   isPublished: boolean("is_published").notNull().default(false),
   publishedAt: timestamp("published_at", { withTimezone: true, mode: "string" }),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })

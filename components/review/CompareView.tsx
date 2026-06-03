@@ -8,6 +8,9 @@ import { BreadcrumbNav } from "@/components/common/BreadcrumbNav";
 import { ShareBar } from "@/components/common/ShareBar";
 import { Check, Trophy, X } from "lucide-react";
 import { cn, siteUrl } from "@/lib/utils";
+import { CompareRecorder } from "@/components/review/CompareRecorder";
+import { SpecTable } from "@/components/review/SpecTable";
+import { CompareColumnsTabs } from "@/components/review/CompareColumnsTabs";
 
 function CompareColumn({
   post,
@@ -264,6 +267,12 @@ export function CompareView({
 
   return (
     <div className="space-y-8">
+      <CompareRecorder
+        left={left.slug}
+        right={right.slug}
+        leftTitle={left.title}
+        rightTitle={right.title}
+      />
       <BreadcrumbNav
         items={[
           { label: "Home", href: "/" },
@@ -303,10 +312,19 @@ export function CompareView({
         title={`${left.title} vs ${right.title} — Verdict`}
       />
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <CompareColumn post={left} otherRating={right.rating} />
-        <CompareColumn post={right} otherRating={left.rating} />
-      </div>
+      <SpecTable
+        leftTitle={left.title}
+        rightTitle={right.title}
+        leftSpecs={left.specs ?? {}}
+        rightSpecs={right.specs ?? {}}
+      />
+
+      <CompareColumnsTabs
+        leftTitle={left.title}
+        rightTitle={right.title}
+        leftColumn={<CompareColumn post={left} otherRating={right.rating} />}
+        rightColumn={<CompareColumn post={right} otherRating={left.rating} />}
+      />
     </div>
   );
 }

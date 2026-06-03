@@ -7,6 +7,7 @@ import { HeaderNavMobile } from "@/components/layout/HeaderNavMobile";
 import { HeaderNavLinks } from "@/components/layout/HeaderNavLinks";
 import { HeaderCategoryNav } from "@/components/layout/HeaderCategoryNav";
 import { CommandSearch } from "@/components/common/CommandSearch";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 export async function Header({ className }: { className?: string }) {
   const [categories, session] = await Promise.all([
@@ -45,6 +46,7 @@ export async function Header({ className }: { className?: string }) {
         </nav>
 
         <div className="flex flex-1 items-center justify-end gap-1 sm:gap-2">
+          <ThemeToggle />
           <CommandSearch />
           <Button
             size="sm"

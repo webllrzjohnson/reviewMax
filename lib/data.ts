@@ -4,6 +4,7 @@ import {
   count,
   desc,
   eq,
+  gte,
   ilike,
   ne,
   or,
@@ -291,11 +292,15 @@ export type PostsPageResult = {
   total: number;
 };
 
+export type BlogSort = "newest" | "highest-rated" | "recently-updated";
+
 export async function getPublishedPostsPage(params: {
   page?: number;
   pageSize?: number;
   q?: string;
   categorySlug?: string;
+  minRating?: number;
+  sort?: BlogSort;
 }): Promise<PostsPageResult> {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(48, Math.max(1, params.pageSize ?? 9));
@@ -321,7 +326,18 @@ export async function getPublishedPostsPage(params: {
     filters.push(eq(posts.categoryId, category.id));
   }
 
+  if (params.minRating && params.minRating > 0) {
+    filters.push(gte(posts.rating, String(params.minRating)));
+  }
+
   const whereClause = and(...filters);
+
+  const orderBy =
+    params.sort === "highest-rated"
+      ? desc(posts.rating)
+      : params.sort === "recently-updated"
+        ? desc(posts.updatedAt)
+        : desc(posts.publishedAt);
 
   try {
     const [totalRow] = await db
@@ -337,7 +353,7 @@ export async function getPublishedPostsPage(params: {
       .from(posts)
       .innerJoin(categories, eq(posts.categoryId, categories.id))
       .where(whereClause)
-      .orderBy(desc(posts.publishedAt))
+      .orderBy(orderBy)
       .limit(pageSize)
       .offset(offset);
 

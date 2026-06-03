@@ -11,6 +11,19 @@ import { PostEditorSchema, type PostEditorInput } from "@/lib/validations";
 
 export type PostActionState = { ok: boolean; message?: string; id?: string };
 
+function parseSpecs(value: string | undefined): Record<string, string> {
+  if (!value?.trim()) return {};
+  const result: Record<string, string> = {};
+  for (const line of value.split("\n")) {
+    const colonIdx = line.indexOf(":");
+    if (colonIdx < 1) continue;
+    const key = line.slice(0, colonIdx).trim();
+    const val = line.slice(colonIdx + 1).trim();
+    if (key && val) result[key] = val;
+  }
+  return result;
+}
+
 function parseFaqs(value: string | undefined): Array<{ q: string; a: string }> {
   if (!value?.trim()) return [];
   const lines = value.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -73,6 +86,8 @@ async function preparePostValues(input: PostEditorInput) {
     galleryUrls: parseUrlLines(input.gallery_urls),
     badge: input.badge?.trim() || null,
     faqs: parseFaqs(input.faqs),
+    priceAtReview: input.price_at_review?.trim() || null,
+    specs: parseSpecs(input.specs),
     isPublished,
     publishedAt: isPublished ? now : null,
     updatedAt: now,
@@ -314,6 +329,8 @@ export async function createPost(
         galleryUrls: values.galleryUrls,
         badge: values.badge,
         faqs: values.faqs,
+        priceAtReview: values.priceAtReview,
+        specs: values.specs,
         isPublished: values.isPublished,
         publishedAt: values.publishedAt,
         updatedAt: values.updatedAt,
@@ -394,6 +411,8 @@ export async function updatePost(
         galleryUrls: values.galleryUrls,
         badge: values.badge,
         faqs: values.faqs,
+        priceAtReview: values.priceAtReview,
+        specs: values.specs,
         isPublished: values.isPublished,
         publishedAt,
         updatedAt: values.updatedAt,

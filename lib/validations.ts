@@ -69,6 +69,8 @@ export const PostEditorSchema = z.object({
   gallery_urls: z.string().optional(),
   badge: z.enum(["editors-choice", "best-value", "top-pick", ""]).optional(),
   faqs: z.string().optional(),
+  price_at_review: z.string().max(80).optional(),
+  specs: z.string().optional(),
   is_published: z.boolean(),
 });
 

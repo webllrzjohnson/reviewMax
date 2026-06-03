@@ -5,6 +5,7 @@ import {
   getCategories,
   getCategoriesWithPublishedPosts,
   getPublishedPostsPage,
+  type BlogSort,
 } from "@/lib/data";
 import { ComparePostGrid } from "@/components/review/ComparePostGrid";
 import { BlogExplorer } from "@/components/blog/BlogExplorer";
@@ -63,24 +64,23 @@ async function BlogPostsSection({
 }: {
   searchParams: SearchParams;
 }) {
-  const page =
-    Number(
-      Array.isArray(searchParams.page)
-        ? searchParams.page[0]
-        : searchParams.page,
-    ) || 1;
-  const qRaw = Array.isArray(searchParams.q)
-    ? searchParams.q[0]
-    : searchParams.q;
-  const catRaw = Array.isArray(searchParams.category)
-    ? searchParams.category[0]
-    : searchParams.category;
+  function first(v: string | string[] | undefined) {
+    return Array.isArray(v) ? v[0] : v;
+  }
+
+  const page = Number(first(searchParams.page)) || 1;
+  const qRaw = first(searchParams.q);
+  const catRaw = first(searchParams.category);
+  const minRatingRaw = Number(first(searchParams.minRating)) || 0;
+  const sortRaw = first(searchParams.sort) as BlogSort | undefined;
 
   const { posts, total } = await getPublishedPostsPage({
     page,
     pageSize: PAGE_SIZE,
     q: qRaw,
     categorySlug: catRaw,
+    minRating: minRatingRaw,
+    sort: sortRaw,
   });
 
   return (

@@ -41,6 +41,8 @@ export interface Post {
   gallery_urls: string[];
   badge: PostBadge | null;
   faqs: PostFaq[];
+  price_at_review: string | null;
+  specs: Record<string, string>;
   is_published: boolean;
   published_at: string | null;
   created_at: string;

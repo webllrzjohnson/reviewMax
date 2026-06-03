@@ -24,6 +24,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
+import { MarkdownEditorField } from "@/components/admin/MarkdownEditorField";
+import { AiAssistPanel } from "@/components/admin/AiAssistPanel";
 
 function linesFromArray(items: string[]): string {
   return items.join("\n");
@@ -45,6 +47,12 @@ function postToFormValues(post: PostWithCategory): PostEditorInput {
     gallery_urls: linesFromArray(post.gallery_urls ?? []),
     badge: post.badge ?? "",
     faqs: post.faqs?.map((f) => `Q: ${f.q}\nA: ${f.a}`).join("\n") ?? "",
+    price_at_review: post.price_at_review ?? "",
+    specs: post.specs
+      ? Object.entries(post.specs)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join("\n")
+      : "",
     is_published: post.is_published,
   };
 }
@@ -79,6 +87,8 @@ export function PostEditorForm({
           gallery_urls: "",
           badge: "",
           faqs: "",
+          price_at_review: "",
+          specs: "",
           is_published: true,
         },
   });
@@ -181,8 +191,13 @@ export function PostEditorForm({
             </div>
 
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="body">Body (HTML or Markdown)</Label>
-              <Textarea id="body" rows={12} className="font-mono text-sm" {...register("body")} />
+              <Label htmlFor="body">Body (Markdown)</Label>
+              <MarkdownEditorField
+                id="body"
+                value={watch("body") ?? ""}
+                onChange={(v) => setValue("body", v, { shouldDirty: true })}
+                rows={14}
+              />
               {errors.body ? (
                 <p className="text-sm text-destructive">{errors.body.message}</p>
               ) : null}
@@ -228,6 +243,18 @@ export function PostEditorForm({
                   {errors.amazon_url.message}
                 </p>
               ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price_at_review">Price at time of review (optional)</Label>
+              <Input
+                id="price_at_review"
+                placeholder="e.g. $89.99"
+                {...register("price_at_review")}
+              />
+              <p className="text-xs text-muted-foreground">
+                Shown near the buy button. Amazon prices change — this anchors reader expectations.
+              </p>
             </div>
 
             <div className="space-y-2 sm:col-span-2">
@@ -280,6 +307,20 @@ export function PostEditorForm({
               </p>
             </div>
 
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="specs">Specs (optional — one spec per line)</Label>
+              <Textarea
+                id="specs"
+                rows={5}
+                className="font-mono text-xs"
+                placeholder={"Battery life: 30 hours\nWeight: 250g\nBluetooth: 5.3\nWater resistance: IPX7"}
+                {...register("specs")}
+              />
+              <p className="text-xs text-muted-foreground">
+                Format: <code>Spec name: value</code>. Shown as a comparison table on the Compare page.
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="badge">Editorial badge (optional)</Label>
               <select
@@ -306,6 +347,17 @@ export function PostEditorForm({
               </Label>
             </div>
           </div>
+
+          <AiAssistPanel
+            getValues={() => ({
+              title: watch("title") ?? "",
+              excerpt: watch("excerpt") ?? "",
+              body: watch("body") ?? "",
+              verdict: watch("verdict") ?? "",
+              pros: watch("pros") ?? "",
+              cons: watch("cons") ?? "",
+            })}
+          />
 
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={isSubmitting}>
