@@ -10,6 +10,7 @@ import {
 } from "@/lib/data";
 import { ReviewCard } from "@/components/review/ReviewCard";
 import { NewsletterSignup } from "@/components/common/NewsletterSignup";
+import { RecentlyViewed } from "@/components/common/RecentlyViewed";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { categoryIconForSlug } from "@/lib/category-icons";
@@ -238,6 +239,8 @@ export default async function HomePage() {
             </div>
           </section>
         )}
+
+        <RecentlyViewed />
 
         <section aria-labelledby="newsletter-heading">
           <h2 id="newsletter-heading" className="sr-only">

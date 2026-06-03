@@ -43,6 +43,7 @@ function postToFormValues(post: PostWithCategory): PostEditorInput {
     amazon_url: post.amazon_url,
     image_url: post.image_url ?? "",
     gallery_urls: linesFromArray(post.gallery_urls ?? []),
+    badge: post.badge ?? "",
     is_published: post.is_published,
   };
 }
@@ -75,6 +76,7 @@ export function PostEditorForm({
           amazon_url: "",
           image_url: "",
           gallery_urls: "",
+          badge: "",
           is_published: true,
         },
   });
@@ -260,6 +262,20 @@ export function PostEditorForm({
               {errors.cons ? (
                 <p className="text-sm text-destructive">{errors.cons.message}</p>
               ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="badge">Editorial badge (optional)</Label>
+              <select
+                id="badge"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                {...register("badge")}
+              >
+                <option value="">None</option>
+                <option value="editors-choice">Editor&apos;s Choice</option>
+                <option value="best-value">Best Value</option>
+                <option value="top-pick">Top Pick</option>
+              </select>
             </div>
 
             <div className="flex items-center gap-2 sm:col-span-2">

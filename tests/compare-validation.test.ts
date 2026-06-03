@@ -18,6 +18,7 @@ function mockPost(overrides: Partial<PostWithCategory> = {}): PostWithCategory {
     amazon_url: "https://amazon.com/dp/123",
     image_url: null,
     gallery_urls: [],
+    badge: null,
     is_published: true,
     published_at: "2026-01-01T00:00:00.000Z",
     created_at: "2026-01-01T00:00:00.000Z",

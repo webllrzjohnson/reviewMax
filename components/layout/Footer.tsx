@@ -33,6 +33,18 @@ export function Footer() {
             About
           </Link>
           <Link
+            href="/methodology"
+            className="text-zinc-400 hover:text-white transition-colors"
+          >
+            How We Test
+          </Link>
+          <Link
+            href="/suggest"
+            className="text-zinc-400 hover:text-white transition-colors"
+          >
+            Suggest a Review
+          </Link>
+          <Link
             href="/contact"
             className="text-zinc-400 hover:text-white transition-colors"
           >

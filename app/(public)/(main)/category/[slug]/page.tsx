@@ -40,7 +40,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${category.name} reviews & buying guide`,
     description,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      types: {
+        "application/rss+xml": `${siteUrl()}/category/${category.slug}/feed.xml`,
+      },
+    },
     openGraph: {
       title: `${category.name} | Verdict`,
       description,

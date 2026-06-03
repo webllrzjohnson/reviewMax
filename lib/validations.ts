@@ -67,6 +67,7 @@ export const PostEditorSchema = z.object({
   amazon_url: z.string().url("Enter a valid product URL"),
   image_url: z.string().optional(),
   gallery_urls: z.string().optional(),
+  badge: z.enum(["editors-choice", "best-value", "top-pick", ""]).optional(),
   is_published: z.boolean(),
 });
 

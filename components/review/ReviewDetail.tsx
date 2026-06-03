@@ -13,6 +13,10 @@ import { formatDate, siteUrl, wasUpdatedAfterPublish, cn } from "@/lib/utils";
 import { getRelatedPosts } from "@/lib/data";
 import { BreadcrumbNav } from "@/components/common/BreadcrumbNav";
 import { ShareBar } from "@/components/common/ShareBar";
+import { TableOfContents } from "@/components/review/TableOfContents";
+import { extractHeadings } from "@/lib/extract-headings";
+import { PostBadgeTag } from "@/components/review/PostBadge";
+import { HelpfulFeedback } from "@/components/review/HelpfulFeedback";
 
 /** Breaks out of main horizontal padding so the hero reads as full-width within the column. */
 function heroBleedClassName() {
@@ -26,6 +30,7 @@ export async function ReviewDetail({
 }) {
   const related = await getRelatedPosts(post.category_id, post.slug, 8);
   const showUpdated = wasUpdatedAfterPublish(post.published_at, post.updated_at);
+  const headings = extractHeadings(post.body);
 
   return (
     <article className={cn("space-y-8", post.amazon_url ? "pb-24 sm:pb-28" : undefined)}>
@@ -60,9 +65,12 @@ export async function ReviewDetail({
         {post.category ? (
           <Badge variant="secondary">{post.category.name}</Badge>
         ) : null}
-        <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-          {post.title}
-        </h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+            {post.title}
+          </h1>
+          <PostBadgeTag badge={post.badge} size="md" />
+        </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
           {post.published_at ? (
             <time dateTime={post.published_at}>
@@ -118,6 +126,8 @@ export async function ReviewDetail({
         className="border-t pt-6"
       />
 
+      <TableOfContents headings={headings} />
+
       <ProsConsList pros={post.pros} cons={post.cons} />
 
       <PostBody body={post.body} />
@@ -168,6 +178,28 @@ export async function ReviewDetail({
           />
         </div>
       </section>
+
+      <HelpfulFeedback postSlug={post.slug} />
+
+      {post.category && related.length > 0 ? (
+        <div className="flex items-center justify-between rounded-xl border bg-muted/30 px-5 py-4">
+          <div>
+            <p className="text-sm font-semibold">
+              See the best {post.category.name} picks
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Top-rated {post.category.name.toLowerCase()} ranked by our
+              editorial team
+            </p>
+          </div>
+          <a
+            href={`/best/${post.category.slug}`}
+            className="shrink-0 ml-4 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
+          >
+            View roundup →
+          </a>
+        </div>
+      ) : null}
 
       <CompareWithLinks post={post} related={related} />
 

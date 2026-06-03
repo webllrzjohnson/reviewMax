@@ -51,12 +51,23 @@ export const posts = pgTable("posts", {
     .array()
     .notNull()
     .default(sql`'{}'::text[]`),
+  badge: text("badge"),
   isPublished: boolean("is_published").notNull().default(false),
   publishedAt: timestamp("published_at", { withTimezone: true, mode: "string" }),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .notNull()
     .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+    .notNull()
+    .defaultNow(),
+});
+
+export const reviewFeedback = pgTable("review_feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  postSlug: text("post_slug").notNull(),
+  helpful: boolean("helpful").notNull(),
+  fingerprint: text("fingerprint").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .notNull()
     .defaultNow(),
 });

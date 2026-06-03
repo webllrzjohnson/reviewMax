@@ -1,6 +1,7 @@
 import sanitizeHtml from "sanitize-html";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 
 function isProbablyHtml(htmlOrMarkdown: string): boolean {
   const t = htmlOrMarkdown.trim();
@@ -44,7 +45,9 @@ export function PostBody({ body }: { body: string }) {
 
   return (
     <div className={proseClass}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
+        {body}
+      </ReactMarkdown>
     </div>
   );
 }

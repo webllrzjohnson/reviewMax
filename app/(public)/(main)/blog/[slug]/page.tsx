@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPostBySlug } from "@/lib/data";
 import { ReviewDetail } from "@/components/review/ReviewDetail";
+import { ReadingProgressBar } from "@/components/common/ReadingProgressBar";
+import { RecentlyViewedRecorder } from "@/components/common/RecentlyViewedRecorder";
 import { siteUrl } from "@/lib/utils";
 
 export const revalidate = 3600;
@@ -41,5 +43,16 @@ export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) notFound();
-  return <ReviewDetail post={post} />;
+  return (
+    <>
+      <ReadingProgressBar />
+      <RecentlyViewedRecorder
+        slug={post.slug}
+        title={post.title}
+        category={post.category?.name ?? null}
+        imageUrl={post.image_url}
+      />
+      <ReviewDetail post={post} />
+    </>
+  );
 }

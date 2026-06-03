@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { auth } from "@/auth";
 import { getCategoriesWithPublishedPosts } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -7,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { HeaderNavMobile } from "@/components/layout/HeaderNavMobile";
 import { HeaderNavLinks } from "@/components/layout/HeaderNavLinks";
 import { HeaderCategoryNav } from "@/components/layout/HeaderCategoryNav";
+import { CommandSearch } from "@/components/common/CommandSearch";
 
 export async function Header({ className }: { className?: string }) {
   const [categories, session] = await Promise.all([
@@ -45,16 +45,7 @@ export async function Header({ className }: { className?: string }) {
         </nav>
 
         <div className="flex flex-1 items-center justify-end gap-1 sm:gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            className="text-zinc-300 hover:bg-zinc-800 hover:text-white"
-          >
-            <Link href="/blog" aria-label="Search reviews">
-              <Search className="h-5 w-5" />
-            </Link>
-          </Button>
+          <CommandSearch />
           <Button
             size="sm"
             asChild

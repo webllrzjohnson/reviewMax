@@ -4,7 +4,8 @@ import type { PostWithCategory } from "@/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ReviewCardImage } from "@/components/review/ReviewCardImage";
-import { formatDate, cn } from "@/lib/utils";
+import { PostBadgeTag } from "@/components/review/PostBadge";
+import { formatDate, wasUpdatedAfterPublish, cn } from "@/lib/utils";
 import { categoryAccentForSlug } from "@/lib/category-colors";
 
 export function ReviewCard({
@@ -19,6 +20,7 @@ export function ReviewCard({
   const slug = post.category?.slug ?? "";
   const accent = categoryAccentForSlug(slug);
   const rating = Number(post.rating ?? 0);
+  const showUpdated = wasUpdatedAfterPublish(post.published_at, post.updated_at);
 
   return (
     <Card
@@ -49,6 +51,7 @@ export function ReviewCard({
                 {post.category.name}
               </Badge>
             ) : null}
+            <PostBadgeTag badge={post.badge} />
             {highlight === "top-rated" ? (
               <Badge className="border-amber-400/50 bg-amber-500 text-white shadow-sm">
                 Top rated
@@ -67,7 +70,14 @@ export function ReviewCard({
           <h3 className="line-clamp-2 text-sm font-semibold leading-snug transition-colors group-hover:text-primary">
             {post.title}
           </h3>
-          {post.published_at ? (
+          {showUpdated ? (
+            <time
+              dateTime={post.updated_at}
+              className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400"
+            >
+              <span aria-hidden>↻</span> Updated {formatDate(post.updated_at)}
+            </time>
+          ) : post.published_at ? (
             <time
               dateTime={post.published_at}
               className="text-xs text-muted-foreground"
