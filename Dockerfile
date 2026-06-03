@@ -16,7 +16,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN NODE_OPTIONS=--max-old-space-size=4096 npm run build
+# --no-lint: ESLint runs in CI/dev (`npm run lint`); saves ~30–60s and RAM during Docker build.
+# Coolify build timeout must be ≥10 min — compile alone can take 3+ minutes before typecheck.
+RUN NODE_OPTIONS=--max-old-space-size=4096 npx next build --no-lint
 
 FROM base AS runner
 WORKDIR /app

@@ -53,6 +53,15 @@ Server-only (never expose to browser): `DATABASE_URL`, `AUTH_SECRET`, `WEBHOOK_S
 4. Paste environment variables.
 5. Attach your domain in Coolify (HTTPS handled by the reverse proxy).
 
+### Coolify build fails at “Linting and checking validity of types” (exit 255)
+
+If the log shows `✓ Compiled successfully` then fails **immediately** on the next line with **no TypeScript error**, the build container was almost certainly **stopped** (timeout or out-of-memory), not rejected by the compiler.
+
+1. **Increase build timeout** in Coolify (application → Advanced / Build → timeout) to **at least 600s (10 minutes)**. A full Next.js + Sentry build often needs **3–6 minutes** before typecheck finishes.
+2. Ensure the server has **≥ 6 GB RAM** free during builds (Dockerfile sets `max-old-space-size=4096` for Node).
+3. Click **Show Debug Logs** and look for `Killed`, `ENOMEM`, or `timeout`.
+4. Run `npm run lint` and `npm run build` locally before pushing; the Dockerfile uses `next build --no-lint` to shorten Coolify builds.
+
 After the first deploy:
 
 ```bash
