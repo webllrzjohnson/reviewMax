@@ -44,6 +44,7 @@ function postToFormValues(post: PostWithCategory): PostEditorInput {
     image_url: post.image_url ?? "",
     gallery_urls: linesFromArray(post.gallery_urls ?? []),
     badge: post.badge ?? "",
+    faqs: post.faqs?.map((f) => `Q: ${f.q}\nA: ${f.a}`).join("\n") ?? "",
     is_published: post.is_published,
   };
 }
@@ -77,6 +78,7 @@ export function PostEditorForm({
           image_url: "",
           gallery_urls: "",
           badge: "",
+          faqs: "",
           is_published: true,
         },
   });
@@ -262,6 +264,20 @@ export function PostEditorForm({
               {errors.cons ? (
                 <p className="text-sm text-destructive">{errors.cons.message}</p>
               ) : null}
+            </div>
+
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="faqs">FAQs (optional — one Q/A pair per two lines)</Label>
+              <Textarea
+                id="faqs"
+                rows={6}
+                className="font-mono text-xs"
+                placeholder={"Q: Is this product waterproof?\nA: Yes, it has an IPX7 rating.\nQ: Does it come with a warranty?\nA: Yes, 2 years from the manufacturer."}
+                {...register("faqs")}
+              />
+              <p className="text-xs text-muted-foreground">
+                Format: <code>Q: question</code> on one line, <code>A: answer</code> on the next. Repeatable.
+              </p>
             </div>
 
             <div className="space-y-2">

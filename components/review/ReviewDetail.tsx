@@ -17,6 +17,7 @@ import { TableOfContents } from "@/components/review/TableOfContents";
 import { extractHeadings } from "@/lib/extract-headings";
 import { PostBadgeTag } from "@/components/review/PostBadge";
 import { HelpfulFeedback } from "@/components/review/HelpfulFeedback";
+import { FaqAccordion } from "@/components/review/FaqAccordion";
 
 /** Breaks out of main horizontal padding so the hero reads as full-width within the column. */
 function heroBleedClassName() {
@@ -131,6 +132,8 @@ export async function ReviewDetail({
       <ProsConsList pros={post.pros} cons={post.cons} />
 
       <PostBody body={post.body} />
+
+      <FaqAccordion faqs={post.faqs} />
 
       {post.gallery_urls && post.gallery_urls.length > 0 ? (
         <section className="space-y-4" aria-labelledby="gallery-heading">
@@ -266,6 +269,19 @@ function JsonLd({ post }: { post: PostWithCategory }) {
     mainEntityOfPage: url,
   };
 
+  const faqLd =
+    post.faqs && post.faqs.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: post.faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }
+      : null;
+
   return (
     <>
       <script
@@ -280,6 +296,12 @@ function JsonLd({ post }: { post: PostWithCategory }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
       />
+      {faqLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+        />
+      )}
     </>
   );
 }

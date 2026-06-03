@@ -31,17 +31,27 @@ export async function generateMetadata(props: {
 
   const [a, b] = result.posts;
   const title = `${a.title} vs ${b.title}`;
+  const base = siteUrl();
+  const ogImageUrl = `${base}/api/og/compare?left=${encodeURIComponent(a.title)}&right=${encodeURIComponent(b.title)}${a.rating != null ? `&lr=${a.rating}` : ""}${b.rating != null ? `&rr=${b.rating}` : ""}${a.category?.name ? `&cat=${encodeURIComponent(a.category.name)}` : ""}`;
+
   return {
     title,
     description: `Compare ratings, pros, cons, and verdicts for ${a.title} and ${b.title}.`,
     alternates: {
-      canonical: `${siteUrl()}/compare?left=${encodeURIComponent(left)}&right=${encodeURIComponent(right)}`,
+      canonical: `${base}/compare?left=${encodeURIComponent(left)}&right=${encodeURIComponent(right)}`,
     },
     openGraph: {
       title: `${title} | Verdict`,
       description: `Side-by-side comparison in ${a.category?.name ?? "the same category"}.`,
-      url: `${siteUrl()}/compare?left=${encodeURIComponent(left)}&right=${encodeURIComponent(right)}`,
+      url: `${base}/compare?left=${encodeURIComponent(left)}&right=${encodeURIComponent(right)}`,
       type: "website",
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | Verdict`,
+      description: `Side-by-side comparison in ${a.category?.name ?? "the same category"}.`,
+      images: [ogImageUrl],
     },
   };
 }

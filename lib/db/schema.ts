@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  jsonb,
   numeric,
   pgEnum,
   pgTable,
@@ -52,6 +53,7 @@ export const posts = pgTable("posts", {
     .notNull()
     .default(sql`'{}'::text[]`),
   badge: text("badge"),
+  faqs: jsonb("faqs").notNull().default(sql`'[]'::jsonb`),
   isPublished: boolean("is_published").notNull().default(false),
   publishedAt: timestamp("published_at", { withTimezone: true, mode: "string" }),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })

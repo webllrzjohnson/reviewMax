@@ -20,6 +20,11 @@ export interface CategoryWithPostCount extends Category {
 
 export type PostBadge = "editors-choice" | "best-value" | "top-pick";
 
+export interface PostFaq {
+  q: string;
+  a: string;
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -35,6 +40,7 @@ export interface Post {
   image_url: string | null;
   gallery_urls: string[];
   badge: PostBadge | null;
+  faqs: PostFaq[];
   is_published: boolean;
   published_at: string | null;
   created_at: string;

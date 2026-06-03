@@ -1,4 +1,4 @@
-import { count, desc, eq } from "drizzle-orm";
+import { asc, count, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { mapCategory, mapPostWithCategory, mapReviewRequest } from "@/lib/db/mappers";
 import {
@@ -8,7 +8,7 @@ import {
   reviewRequests,
 } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
-import type { Category, PostWithCategory, ReviewRequest } from "@/types";
+import type { Category, NewsletterSubscriber, PostWithCategory, ReviewRequest } from "@/types";
 
 export type AdminDashboardData = {
   email: string;
@@ -107,6 +107,23 @@ export async function getAdminCategoryById(
     return row ? mapCategory(row) : null;
   } catch {
     return null;
+  }
+}
+
+export async function getAllSubscribers(): Promise<NewsletterSubscriber[]> {
+  await requireAdmin();
+  try {
+    const rows = await db
+      .select()
+      .from(newsletterSubscribers)
+      .orderBy(asc(newsletterSubscribers.createdAt));
+    return rows.map((r) => ({
+      id: r.id,
+      email: r.email,
+      created_at: r.createdAt,
+    }));
+  } catch {
+    return [];
   }
 }
 

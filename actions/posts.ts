@@ -11,6 +11,18 @@ import { PostEditorSchema, type PostEditorInput } from "@/lib/validations";
 
 export type PostActionState = { ok: boolean; message?: string; id?: string };
 
+function parseFaqs(value: string | undefined): Array<{ q: string; a: string }> {
+  if (!value?.trim()) return [];
+  const lines = value.split("\n").map((l) => l.trim()).filter(Boolean);
+  const faqs: Array<{ q: string; a: string }> = [];
+  for (let i = 0; i < lines.length - 1; i += 2) {
+    const q = lines[i].replace(/^Q:\s*/i, "").trim();
+    const a = lines[i + 1].replace(/^A:\s*/i, "").trim();
+    if (q && a) faqs.push({ q, a });
+  }
+  return faqs;
+}
+
 function parseLines(value: string): string[] {
   return value
     .split("\n")
@@ -60,6 +72,7 @@ async function preparePostValues(input: PostEditorInput) {
     imageUrl,
     galleryUrls: parseUrlLines(input.gallery_urls),
     badge: input.badge?.trim() || null,
+    faqs: parseFaqs(input.faqs),
     isPublished,
     publishedAt: isPublished ? now : null,
     updatedAt: now,
@@ -300,6 +313,7 @@ export async function createPost(
         imageUrl: values.imageUrl,
         galleryUrls: values.galleryUrls,
         badge: values.badge,
+        faqs: values.faqs,
         isPublished: values.isPublished,
         publishedAt: values.publishedAt,
         updatedAt: values.updatedAt,
@@ -379,6 +393,7 @@ export async function updatePost(
         imageUrl: values.imageUrl,
         galleryUrls: values.galleryUrls,
         badge: values.badge,
+        faqs: values.faqs,
         isPublished: values.isPublished,
         publishedAt,
         updatedAt: values.updatedAt,

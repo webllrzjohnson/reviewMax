@@ -1,4 +1,4 @@
-import type { Category, Post, PostBadge, PostWithCategory, ReviewRequest } from "@/types";
+import type { Category, Post, PostBadge, PostFaq, PostWithCategory, ReviewRequest } from "@/types";
 import type {
   categories,
   posts,
@@ -35,6 +35,7 @@ export function mapPost(row: PostRow): Post {
     image_url: row.imageUrl,
     gallery_urls: row.galleryUrls ?? [],
     badge: (row.badge as PostBadge | null) ?? null,
+    faqs: Array.isArray(row.faqs) ? (row.faqs as PostFaq[]) : [],
     is_published: row.isPublished,
     published_at: row.publishedAt,
     created_at: row.createdAt,
