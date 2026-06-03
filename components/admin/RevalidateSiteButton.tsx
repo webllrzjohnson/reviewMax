@@ -16,7 +16,7 @@ export function RevalidateSiteButton() {
       onClick={() =>
         startTransition(async () => {
           const r = await revalidateSiteAction();
-          r.ok ? toast.success(r.message) : toast.error(r.message);
+          if (r.ok) { toast.success(r.message); } else { toast.error(r.message); }
         })
       }
     >

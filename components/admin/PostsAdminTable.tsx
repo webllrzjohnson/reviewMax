@@ -55,7 +55,7 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
   function toggleOne(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
       return next;
     });
   }
@@ -85,7 +85,7 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
               onClick={() =>
                 startTransition(async () => {
                   const r = await bulkSetPostsPublished(selectedIds, true);
-                  r.ok ? toast.success(r.message) : toast.error(r.message);
+                  if (r.ok) { toast.success(r.message); } else { toast.error(r.message); }
                   refresh();
                 })
               }
@@ -99,7 +99,7 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
               onClick={() =>
                 startTransition(async () => {
                   const r = await bulkSetPostsPublished(selectedIds, false);
-                  r.ok ? toast.success(r.message) : toast.error(r.message);
+                  if (r.ok) { toast.success(r.message); } else { toast.error(r.message); }
                   refresh();
                 })
               }
@@ -129,7 +129,7 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
                     onClick={() =>
                       startTransition(async () => {
                         const r = await bulkDeletePosts(selectedIds);
-                        r.ok ? toast.success(r.message) : toast.error(r.message);
+                        if (r.ok) { toast.success(r.message); } else { toast.error(r.message); }
                         refresh();
                       })
                     }
@@ -259,9 +259,7 @@ export function PostsAdminTable({ posts }: { posts: PostWithCategory[] }) {
                       onClick={() =>
                         startTransition(async () => {
                           const r = await revalidatePostAction(post.slug);
-                          r.ok
-                            ? toast.success(r.message ?? "Cache cleared.")
-                            : toast.error(r.message);
+                          if (r.ok) { toast.success(r.message ?? "Cache cleared."); } else { toast.error(r.message); }
                         })
                       }
                     >
