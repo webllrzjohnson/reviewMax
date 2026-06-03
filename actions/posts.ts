@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { posts } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
@@ -73,6 +73,96 @@ function revalidatePostPaths(slug?: string) {
   revalidatePath("/");
   if (slug) {
     revalidatePath(`/blog/${slug}`);
+  }
+}
+
+export async function revalidatePostAction(slug: string): Promise<PostActionState> {
+  try {
+    await requireAdmin();
+    revalidatePath(`/blog/${slug}`);
+    revalidatePath("/blog");
+    revalidatePath("/");
+    return { ok: true, message: "Page cache cleared." };
+  } catch {
+    return { ok: false, message: "Unauthorized." };
+  }
+}
+
+export async function revalidateSiteAction(): Promise<PostActionState> {
+  try {
+    await requireAdmin();
+    revalidatePath("/", "layout");
+    return { ok: true, message: "Full site cache cleared." };
+  } catch {
+    return { ok: false, message: "Unauthorized." };
+  }
+}
+
+export async function bulkSetPostsPublished(
+  ids: string[],
+  is_published: boolean,
+): Promise<PostActionState> {
+  if (!ids.length) return { ok: false, message: "No posts selected." };
+  try {
+    await requireAdmin();
+    const now = new Date().toISOString();
+
+    const existing = await db
+      .select({ id: posts.id, slug: posts.slug, publishedAt: posts.publishedAt })
+      .from(posts)
+      .where(inArray(posts.id, ids));
+
+    for (const post of existing) {
+      await db
+        .update(posts)
+        .set({
+          isPublished: is_published,
+          publishedAt: is_published && !post.publishedAt ? now : post.publishedAt,
+          updatedAt: now,
+        })
+        .where(eq(posts.id, post.id));
+
+      revalidatePath(`/blog/${post.slug}`);
+    }
+
+    revalidatePath("/blog");
+    revalidatePath("/dashboard/posts");
+    revalidatePath("/");
+
+    return {
+      ok: true,
+      message: `${existing.length} post${existing.length === 1 ? "" : "s"} ${is_published ? "published" : "unpublished"}.`,
+    };
+  } catch (e) {
+    console.warn(e);
+    return { ok: false, message: "Something went wrong." };
+  }
+}
+
+export async function bulkDeletePosts(ids: string[]): Promise<PostActionState> {
+  if (!ids.length) return { ok: false, message: "No posts selected." };
+  try {
+    await requireAdmin();
+
+    const existing = await db
+      .select({ slug: posts.slug })
+      .from(posts)
+      .where(inArray(posts.id, ids));
+
+    await db.delete(posts).where(inArray(posts.id, ids));
+
+    for (const post of existing) revalidatePath(`/blog/${post.slug}`);
+    revalidatePath("/blog");
+    revalidatePath("/dashboard/posts");
+    revalidatePath("/");
+
+    return {
+      ok: true,
+      message: `${existing.length} post${existing.length === 1 ? "" : "s"} deleted.`,
+    };
+  } catch (e) {
+    console.warn(e);
+    return { ok: false, message: "Something went wrong." };
   }
 }
 

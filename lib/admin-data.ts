@@ -110,6 +110,19 @@ export async function getAdminCategoryById(
   }
 }
 
+export async function getAllReviewRequests(): Promise<ReviewRequest[]> {
+  await requireAdmin();
+  try {
+    const rows = await db
+      .select()
+      .from(reviewRequests)
+      .orderBy(desc(reviewRequests.createdAt));
+    return rows.map(mapReviewRequest);
+  } catch {
+    return [];
+  }
+}
+
 export async function getAdminPosts(): Promise<PostWithCategory[]> {
   await requireAdmin();
 

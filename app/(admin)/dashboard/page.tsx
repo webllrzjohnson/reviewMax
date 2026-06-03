@@ -37,6 +37,9 @@ export default async function DashboardPage() {
           <Button asChild variant="outline">
             <Link href="/dashboard/posts">Manage posts</Link>
           </Button>
+          <Button asChild variant="outline">
+            <Link href="/dashboard/review-requests">Review queue</Link>
+          </Button>
         </div>
       </div>
 
@@ -54,7 +57,10 @@ export default async function DashboardPage() {
         <CardHeader>
           <CardTitle>Recent review requests</CardTitle>
           <CardDescription>
-            Last 10 items submitted from the dashboard (n8n webhook optional).
+            Last 10 items.{" "}
+            <Link href="/dashboard/review-requests" className="text-primary underline">
+              View all requests →
+            </Link>
           </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
