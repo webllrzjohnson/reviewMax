@@ -86,6 +86,7 @@ export function CommandSearch() {
             setResults([]);
           }
         }}
+        shouldFilter={false}
         title="Search reviews"
         description="Type to search Verdict reviews"
       >
