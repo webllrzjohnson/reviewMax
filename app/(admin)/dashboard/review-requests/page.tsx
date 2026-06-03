@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function ReviewRequestsPage() {
   const requests = await getAllReviewRequests();
   const publicCount = requests.filter((r) => !r.created_by).length;
+  const pendingCount = requests.filter((r) => !r.processed_at).length;
 
   return (
     <div className="space-y-8">
@@ -17,8 +18,10 @@ export default async function ReviewRequestsPage() {
             Review requests
           </h1>
           <p className="mt-1 text-muted-foreground">
-            {requests.length} total — {publicCount} from public suggestions,{" "}
-            {requests.length - publicCount} from admin.
+            {pendingCount} pending, {requests.length} total — {publicCount}{" "}
+            from public suggestions, {requests.length - publicCount} from admin.
+            Use <span className="font-medium text-foreground">Process</span> to
+            send a request to n8n without re-entering it.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

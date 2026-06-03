@@ -1,11 +1,12 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { reviewRequests } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
 import { expandAmazonProductUrl } from "@/lib/amazon-image";
-import { getCategoryBySlug } from "@/lib/data";
+import { triggerReviewRequestN8n } from "@/lib/review-request-n8n";
 import {
   ReviewRequestSchema,
   type ReviewRequestInput,
@@ -36,61 +37,71 @@ export async function submitReviewRequestAction(
   try {
     const session = await requireAdmin();
     const amazonUrl = await expandAmazonProductUrl(parsed.data.amazon_url);
+    const notes =
+      parsed.data.notes != null && parsed.data.notes.trim() !== ""
+        ? parsed.data.notes.trim()
+        : null;
 
-    await db.insert(reviewRequests).values({
-      productName: parsed.data.product_name,
-      categorySlug: parsed.data.category,
-      amazonUrl,
-      notes:
-        parsed.data.notes != null && parsed.data.notes.trim() !== ""
-          ? parsed.data.notes.trim()
-          : null,
-      createdBy: session.user.id,
-    });
+    const [inserted] = await db
+      .insert(reviewRequests)
+      .values({
+        productName: parsed.data.product_name,
+        categorySlug: parsed.data.category,
+        amazonUrl,
+        notes,
+        createdBy: session.user.id,
+      })
+      .returning({ id: reviewRequests.id });
 
-    const webhookUrl = process.env.N8N_REVIEW_WEBHOOK_URL;
-    let n8nOk = true;
-
-    if (webhookUrl) {
-      const category = await getCategoryBySlug(parsed.data.category);
-
-      try {
-        const response = await fetch(webhookUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Webhook-Secret": process.env.WEBHOOK_SECRET ?? "",
-          },
-          body: JSON.stringify({
-            product_name: parsed.data.product_name,
-            category: parsed.data.category,
-            category_id: category?.id ?? null,
-            amazon_url: amazonUrl,
-            notes:
-              parsed.data.notes != null && parsed.data.notes.trim() !== ""
-                ? parsed.data.notes.trim()
-                : null,
-          }),
-        });
-
-        if (!response.ok) {
-          n8nOk = false;
-          console.error("n8n webhook", response.status, await response.text());
-        }
-      } catch (e) {
-        n8nOk = false;
-        console.error("n8n webhook", e);
-      }
+    if (!inserted) {
+      return { ok: false, message: "Something went wrong." };
     }
 
+    const n8n = await triggerReviewRequestN8n({
+      product_name: parsed.data.product_name,
+      category_slug: parsed.data.category,
+      amazon_url: amazonUrl,
+      notes,
+    });
+
+    if (n8n.skipped) {
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/review-requests");
+      return {
+        ok: true,
+        message: n8n.message ?? "Request saved.",
+      };
+    }
+
+    if (n8n.ok) {
+      await db
+        .update(reviewRequests)
+        .set({
+          processedAt: new Date().toISOString(),
+          processedBy: session.user.id,
+          processError: null,
+        })
+        .where(eq(reviewRequests.id, inserted.id));
+
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/review-requests");
+      return {
+        ok: true,
+        message: "Request saved and sent to n8n for generation.",
+      };
+    }
+
+    await db
+      .update(reviewRequests)
+      .set({ processError: n8n.message ?? "Webhook failed." })
+      .where(eq(reviewRequests.id, inserted.id));
+
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/review-requests");
     return {
       ok: true,
-      message: webhookUrl
-        ? n8nOk
-          ? "Request saved and sent to n8n for generation."
-          : "Request saved, but n8n did not accept the webhook. Check your n8n URL and workflow."
-        : "Request saved. Set N8N_REVIEW_WEBHOOK_URL in .env.local to trigger automation.",
+      message:
+        "Request saved, but n8n did not accept the webhook. Use Process on the queue to retry.",
     };
   } catch (e) {
     console.error(e);

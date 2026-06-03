@@ -8,7 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
+import {
+  getReviewRequestStatus,
+  reviewRequestStatusLabel,
+} from "@/lib/review-request-status";
+import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
@@ -76,22 +81,42 @@ export default async function DashboardPage() {
               to test your pipeline.
             </p>
           ) : (
-            <table className="w-full min-w-[640px] border-collapse text-sm">
+            <table className="w-full min-w-[720px] border-collapse text-sm">
               <thead>
                 <tr className="border-b text-left text-muted-foreground">
                   <th className="pb-3 pr-4 font-medium">Product</th>
                   <th className="pb-3 pr-4 font-medium">Category</th>
+                  <th className="pb-3 pr-4 font-medium">Status</th>
                   <th className="pb-3 pr-4 font-medium">Amazon URL</th>
                   <th className="pb-3 pr-4 font-medium">Created</th>
                 </tr>
               </thead>
               <tbody>
-                {recentRequests.map((r) => (
+                {recentRequests.map((r) => {
+                  const status = getReviewRequestStatus(r);
+                  return (
                   <tr key={r.id} className="border-b last:border-0">
                     <td className="py-3 pr-4 align-top font-medium">
                       {r.product_name}
                     </td>
                     <td className="py-3 pr-4 align-top">{r.category_slug}</td>
+                    <td className="py-3 pr-4 align-top">
+                      <Badge
+                        variant={
+                          status === "processed"
+                            ? "default"
+                            : status === "failed"
+                              ? "outline"
+                              : "secondary"
+                        }
+                        className={cn(
+                          status === "failed" &&
+                            "border-destructive/50 text-destructive",
+                        )}
+                      >
+                        {reviewRequestStatusLabel(status)}
+                      </Badge>
+                    </td>
                     <td className="py-3 pr-4 align-top">
                       <a
                         href={r.amazon_url}
@@ -106,7 +131,8 @@ export default async function DashboardPage() {
                       {formatDate(r.created_at)}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           )}

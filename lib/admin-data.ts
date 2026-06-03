@@ -1,4 +1,4 @@
-import { asc, count, desc, eq } from "drizzle-orm";
+import { asc, count, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { mapCategory, mapPostWithCategory, mapReviewRequest } from "@/lib/db/mappers";
 import {
@@ -34,7 +34,10 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     db.select({ total: count() }).from(posts),
     db.select({ total: count() }).from(categories),
     db.select({ total: count() }).from(newsletterSubscribers),
-    db.select({ total: count() }).from(reviewRequests),
+    db
+      .select({ total: count() })
+      .from(reviewRequests)
+      .where(isNull(reviewRequests.processedAt)),
     db
       .select()
       .from(reviewRequests)

@@ -93,6 +93,11 @@ export const reviewRequests = pgTable("review_requests", {
   createdBy: uuid("created_by").references(() => users.id, {
     onDelete: "set null",
   }),
+  processedAt: timestamp("processed_at", { withTimezone: true, mode: "string" }),
+  processedBy: uuid("processed_by").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  processError: text("process_error"),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .notNull()
     .defaultNow(),

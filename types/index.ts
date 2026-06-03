@@ -66,6 +66,9 @@ export interface ReviewRequest {
   amazon_url: string;
   notes: string | null;
   created_by: string | null;
+  processed_at: string | null;
+  processed_by: string | null;
+  process_error: string | null;
   created_at: string;
 }
 

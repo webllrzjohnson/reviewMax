@@ -65,6 +65,9 @@ export function mapReviewRequest(row: ReviewRequestRow): ReviewRequest {
     amazon_url: row.amazonUrl,
     notes: row.notes,
     created_by: row.createdBy,
+    processed_at: row.processedAt,
+    processed_by: row.processedBy,
+    process_error: row.processError,
     created_at: row.createdAt,
   };
 }
