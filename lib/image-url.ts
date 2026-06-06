@@ -47,6 +47,22 @@ export function isDirectImageUrl(url: string): boolean {
  * Normalizes a stored image URL from forms/webhooks.
  * Returns null for empty values, Amazon product pages, and invalid URLs.
  */
+
+export function coerceProductImageUrl(
+  value: string | undefined | null,
+): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (!isDirectImageUrl(trimmed) && !AMAZON_IMAGE_HOST.test(trimmed)) return null;
+
+  // Strip all size codes and normalize to SL1500
+  const match = trimmed.match(/^(https:\/\/.+\/images\/[A-Z]\/[A-Za-z0-9+\-]+)/i);
+  if (match) return `${match[1]}._SL1500_.jpg`;
+
+  return isDirectImageUrl(trimmed) ? trimmed : null;
+}
+
+/*
 export function coerceProductImageUrl(
   value: string | undefined | null,
 ): string | null {
@@ -54,3 +70,4 @@ export function coerceProductImageUrl(
   if (!trimmed) return null;
   return isDirectImageUrl(trimmed) ? trimmed : null;
 }
+*/

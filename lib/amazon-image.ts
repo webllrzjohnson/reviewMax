@@ -96,6 +96,20 @@ function normalizeAmazonImageUrl(raw: string): string | null {
 }
 
 /** Collapse Amazon size suffixes to a single high-res variant. */
+
+
+function upscaleAmazonImageUrl(url: string): string {
+  const base = url.split("?")[0];
+  const match = base.match(
+    /^(https:\/\/.+\/images\/[A-Z]\/[A-Za-z0-9+\-]+)/i,
+  );
+  if (match) {
+    return `${match[1]}._SL1500_.jpg`;
+  }
+  return base;
+}
+
+/*
 function upscaleAmazonImageUrl(url: string): string {
   const base = url.split("?")[0];
   const match = base.match(
@@ -109,7 +123,7 @@ function upscaleAmazonImageUrl(url: string): string {
   }
   return base.replace(/(\._[A-Za-z0-9]+_)+(?=\.[a-z]+$)/i, "._AC_SL1500_.");
 }
-
+*/
 const THUMBNAIL_MARKER =
   /\._(?:SS|SX|SY|US|SR|CR|AC_US|AC_SY|AC_SX|SL\d{1,3})_\./i;
 
