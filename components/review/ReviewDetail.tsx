@@ -20,11 +20,6 @@ import { HelpfulFeedback } from "@/components/review/HelpfulFeedback";
 import { FaqAccordion } from "@/components/review/FaqAccordion";
 import { GalleryLightbox } from "@/components/review/GalleryLightbox";
 
-/** Breaks out of main horizontal padding so the hero reads as full-width within the column. */
-function heroBleedClassName() {
-  return "-mx-4 w-[calc(100%+2rem)] sm:-mx-6 sm:w-[calc(100%+3rem)]";
-}
-
 export async function ReviewDetail({
   post,
 }: {
@@ -53,85 +48,91 @@ export async function ReviewDetail({
         ]}
       />
 
-      <div
-        className={`relative aspect-[21/9] max-h-[min(70vh,520px)] min-h-[200px] w-full overflow-hidden rounded-none bg-muted sm:rounded-xl ${heroBleedClassName()}`}
-      >
-        <ReviewCardImage
-          src={post.image_url}
-          alt={post.title}
-          sizes="(max-width: 768px) 100vw, min(1152px, 100vw)"
-          priority
-        />
-      </div>
-
-      <header className="space-y-4">
-        {post.category ? (
-          <Badge className={cn("border shadow-sm", accent.badge)}>
-            {post.category.name}
-          </Badge>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-            {post.title}
-          </h1>
-          <PostBadgeTag badge={post.badge} size="md" />
-        </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-          {post.published_at ? (
-            <time dateTime={post.published_at}>
-              Published {formatDate(post.published_at)}
-            </time>
-          ) : null}
-          {showUpdated ? (
-            <time dateTime={post.updated_at!}>
-              Updated {formatDate(post.updated_at)}
-            </time>
-          ) : null}
-          {post.amazon_url ? (
-            <span>
-              Contains{" "}
-              <a href="/affiliate-disclosure" className="underline hover:text-foreground">
-                affiliate links
-              </a>
-            </span>
-          ) : null}
-        </div>
-        <AnimatedRating rating={post.rating} className="pt-2" />
-      </header>
-
-      <aside
-        id="review-verdict"
-        className="rounded-xl border border-[#16A34A]/25 bg-[#16A34A]/5 p-5 dark:border-[#22C55E]/20 dark:bg-[#22C55E]/8"
-        aria-labelledby="quick-verdict-heading"
-      >
-        <p
-          id="quick-verdict-heading"
-          className="text-sm font-semibold uppercase tracking-wide text-[#16A34A] dark:text-[#22C55E]"
-        >
-          Verdict
-        </p>
-        <p className="mt-3 text-base font-medium leading-relaxed">
-          {post.verdict}
-        </p>
-        {post.amazon_url ? (
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <AffiliateButton
-              href_raw={post.amazon_url}
-              postSlug={post.slug}
-              label="Check price on Amazon"
-              className="w-full sm:w-auto"
+      <section className="flow-root">
+        <figure className="mx-auto mb-6 w-full max-w-[280px] sm:float-right sm:mb-4 sm:ml-8 sm:w-64 lg:w-72">
+          <div className="relative aspect-square overflow-hidden rounded-xl border bg-muted shadow-sm">
+            <ReviewCardImage
+              src={post.image_url}
+              alt={post.title}
+              sizes="(max-width: 640px) 280px, 288px"
+              priority
+              fit="contain"
             />
-            {post.price_at_review ? (
-              <p className="text-xs text-muted-foreground">
-                Price at review:{" "}
-                <span className="font-semibold text-foreground">
-                  {post.price_at_review}
-                </span>
-              </p>
+          </div>
+        </figure>
+
+        <header className="space-y-4">
+          {post.category ? (
+            <Badge className={cn("border shadow-sm", accent.badge)}>
+              {post.category.name}
+            </Badge>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+              {post.title}
+            </h1>
+            <PostBadgeTag badge={post.badge} size="md" />
+          </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            {post.published_at ? (
+              <time dateTime={post.published_at}>
+                Published {formatDate(post.published_at)}
+              </time>
+            ) : null}
+            {showUpdated ? (
+              <time dateTime={post.updated_at!}>
+                Updated {formatDate(post.updated_at)}
+              </time>
+            ) : null}
+            {post.amazon_url ? (
+              <span>
+                Contains{" "}
+                <a
+                  href="/affiliate-disclosure"
+                  className="underline hover:text-foreground"
+                >
+                  affiliate links
+                </a>
+              </span>
             ) : null}
           </div>
-        ) : null}
-      </aside>
+          <AnimatedRating rating={post.rating} className="pt-2" />
+        </header>
+
+        <aside
+          id="review-verdict"
+          className="mt-6 rounded-xl border border-[#16A34A]/25 bg-[#16A34A]/5 p-5 dark:border-[#22C55E]/20 dark:bg-[#22C55E]/8"
+          aria-labelledby="quick-verdict-heading"
+        >
+          <p
+            id="quick-verdict-heading"
+            className="text-sm font-semibold uppercase tracking-wide text-[#16A34A] dark:text-[#22C55E]"
+          >
+            Verdict
+          </p>
+          <p className="mt-3 text-base font-medium leading-relaxed">
+            {post.verdict}
+          </p>
+          {post.amazon_url ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <AffiliateButton
+                href_raw={post.amazon_url}
+                postSlug={post.slug}
+                label="Check price on Amazon"
+                className="w-full sm:w-auto"
+              />
+              {post.price_at_review ? (
+                <p className="text-xs text-muted-foreground">
+                  Price at review:{" "}
+                  <span className="font-semibold text-foreground">
+                    {post.price_at_review}
+                  </span>
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </aside>
+      </section>
 
       <ShareBar
         url={`${siteUrl()}/blog/${post.slug}`}

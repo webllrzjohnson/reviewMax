@@ -23,6 +23,8 @@
 # scratch notes at repo root (not part of the app)
 /*.txt
 /notes.txt
+TODO.md
+.cursor/rules/check-todo-first.mdc
 
 # debug
 npm-debug.log*
