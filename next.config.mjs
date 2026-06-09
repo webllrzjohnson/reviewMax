@@ -4,6 +4,7 @@ import { isSentryConfigured } from "./sentry-env.mjs";
 
 const nextConfig = {
   output: "standalone",
+  serverExternalPackages: ['puppeteer'],
   outputFileTracingExcludes: {
     "*": [
       // Do NOT exclude @swc — Next.js server requires @swc/helpers at runtime.
