@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const { title, category, rating, image, slug } = await req.json()
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verdict.maplehub.cloud'
-    const templateUrl = `${baseUrl}/pin-template?title=${encodeURIComponent(title)}&category=${encodeURIComponent(category)}&rating=${encodeURIComponent(rating)}&image=${encodeURIComponent(image)}`
+    const templateUrl = `${baseUrl}/pin-template?title=${encodeURIComponent(title)}&category=${encodeURIComponent(category)}&rating=${encodeURIComponent(rating)}&image=${encodeURIComponent(image)}&headless=1`
 
     const browser = await puppeteer.launch({
         executablePath: '/usr/bin/chromium-browser',

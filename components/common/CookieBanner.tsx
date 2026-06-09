@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,17 +10,14 @@ import {
 } from "@/lib/analytics-consent";
 
 export function CookieBanner() {
+  const searchParams = useSearchParams()
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     setVisible(getStoredConsent() === null);
   }, []);
 
-  function persistPreference(value: ConsentValue) {
-    setStoredConsent(value);
-    setVisible(false);
-  }
-
+  if (searchParams.get('headless') === '1') return null
   if (!visible) return null;
 
   return (
@@ -53,4 +51,9 @@ export function CookieBanner() {
       </div>
     </div>
   );
+
+  function persistPreference(value: ConsentValue) {
+    setStoredConsent(value);
+    setVisible(false);
+  }
 }
