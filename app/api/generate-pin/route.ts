@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import puppeteer from 'puppeteer'
+import puppeteer from 'puppeteer-core'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
@@ -10,7 +10,8 @@ export async function POST(req: NextRequest) {
     const templateUrl = `${baseUrl}/pin-template?title=${encodeURIComponent(title)}&category=${encodeURIComponent(category)}&rating=${encodeURIComponent(rating)}&image=${encodeURIComponent(image)}`
 
     const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        executablePath: '/usr/bin/chromium-browser',
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
         headless: true,
     })
 
