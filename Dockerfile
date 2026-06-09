@@ -28,8 +28,10 @@ RUN apk add --no-cache libc6-compat chromium nss freetype harfbuzz ca-certificat
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV CHROMIUM_PATH=/usr/bin/chromium-browser
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
-
+    adduser --system --uid 1001 nextjs && \
+    mkdir -p /app/public/pins && \
+    chown -R nextjs:nodejs /app/public
+    
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
