@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
         const screenshotBuffer = await page.screenshot({ type: 'png' })
 
-        const pinsDir = path.join(process.cwd(), 'public', 'pins')
+        const pinsDir = '/tmp/pins'
         await mkdir(pinsDir, { recursive: true })
 
         const filename = `pin-${slug}-${Date.now()}.png`
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            pin_image_url: `${baseUrl}/pins/${filename}`
+            pin_image_url: `${baseUrl}/api/pin-image/${filename}`
         })
     } catch (err) {
         console.error('Pin generation error:', err)
