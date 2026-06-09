@@ -5,6 +5,7 @@ import { AppProviders } from "@/components/providers/AppProviders";
 import { Toaster } from "sonner";
 import { CookieBanner } from "@/components/common/CookieBanner";
 import { siteUrl, cn } from "@/lib/utils";
+import { Suspense } from "react";
 
 /**
  * Root shell: fonts, providers, toast, and cookie consent.
@@ -60,7 +61,9 @@ export default function RootLayout({
         <AppProviders>
           {children}
           <Toaster richColors position="top-center" />
-          <CookieBanner />
+          <Suspense fallback={null}>
+            <CookieBanner />
+          </Suspense>
         </AppProviders>
       </body>
     </html>
