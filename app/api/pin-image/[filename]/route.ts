@@ -4,10 +4,11 @@ import path from 'path'
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { filename: string } }
+    context: { params: Promise<{ filename: string }> }
 ) {
     try {
-        const filepath = path.join('/tmp/pins', params.filename)
+        const { filename } = await context.params
+        const filepath = path.join('/tmp/pins', filename)
         const file = await readFile(filepath)
         return new NextResponse(file, {
             headers: { 'Content-Type': 'image/png' }
